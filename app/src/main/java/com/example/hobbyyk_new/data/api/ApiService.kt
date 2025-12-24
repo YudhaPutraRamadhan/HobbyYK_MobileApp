@@ -16,6 +16,8 @@ interface ApiService {
     @GET("communities")
     suspend fun getCommunities(): Response<List<Community>>
 
+    @GET("communities/{id}")
+    suspend fun getCommunityDetail(@Path("id") id: Int): Response<Community>
     // Endpoint VERIFIKASI OTP (Nanti kita buat modelnya kalau sudah sampai layar OTP)
     // Untuk sementara Login & Register dulu yang penting
 }
