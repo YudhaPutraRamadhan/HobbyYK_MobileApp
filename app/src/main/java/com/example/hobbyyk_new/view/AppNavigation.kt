@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.hobbyyk_new.view.screen.CommunityDetailScreen
 import com.example.hobbyyk_new.view.screen.CommunityListScreen
 import com.example.hobbyyk_new.view.screen.HomeScreen
 import com.example.hobbyyk_new.view.screen.LandingApp
@@ -41,6 +42,21 @@ fun AppNavigation() {
                     }
                 }
             )
+        }
+
+        composable(
+            route = "detail_community/{communityId}",
+            arguments = listOf(
+                androidx.navigation.navArgument("communityId") {
+                    type = androidx.navigation.NavType.IntType // Tipe datanya Angka (Int)
+                }
+            )
+        ) { backStackEntry ->
+            // Ambil ID dari paket yang dikirim
+            val id = backStackEntry.arguments?.getInt("communityId") ?: 0
+
+            // Panggil Layarnya
+            CommunityDetailScreen(navController, id)
         }
 
         composable("home") {
