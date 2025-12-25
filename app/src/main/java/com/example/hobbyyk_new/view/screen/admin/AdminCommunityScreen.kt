@@ -1,14 +1,14 @@
-package com.example.hobbyyk_new.view.screen
+package com.example.hobbyyk_new.view.screen.admin
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,20 +28,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.hobbyyk_new.data.model.Community
 import com.example.hobbyyk_new.utils.Constants.URL_GAMBAR_BASE
-import java.io.File
+import com.example.hobbyyk_new.utils.uriToFile
+import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
+import androidx.compose.foundation.lazy.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminCommunityScreen(navController: androidx.navigation.NavController) {
+fun AdminCommunityScreen(navController: NavController) {
     val viewModel: AdminCommunityViewModel = viewModel()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
 
     var showCreateDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -60,11 +64,11 @@ fun AdminCommunityScreen(navController: androidx.navigation.NavController) {
             onSave = { id, nama, loc, desk, kat, kon, link, newLogoUri, newBannerUri ->
 
                 val logoFile = if (newLogoUri != null) {
-                    com.example.hobbyyk_new.utils.uriToFile(newLogoUri, context)
+                    uriToFile(newLogoUri, context)
                 } else null
 
                 val bannerFile = if (newBannerUri != null) {
-                    com.example.hobbyyk_new.utils.uriToFile(newBannerUri, context)
+                    uriToFile(newBannerUri, context)
                 } else null
 
                 viewModel.updateCommunity(
@@ -104,8 +108,8 @@ fun AdminCommunityScreen(navController: androidx.navigation.NavController) {
             onDismiss = { showCreateDialog = false },
             onSave = { nama, lokasi, deskripsi, kategori, kontak, linkGrup, logoUri, bannerUri ->
                 if (logoUri != null && bannerUri != null) {
-                    val logoFile = com.example.hobbyyk_new.utils.uriToFile(logoUri, context)
-                    val bannerFile = com.example.hobbyyk_new.utils.uriToFile(bannerUri, context)
+                    val logoFile = uriToFile(logoUri, context)
+                    val bannerFile = uriToFile(bannerUri, context)
 
                     viewModel.createCommunity(
                         nama, lokasi, deskripsi,
@@ -239,7 +243,7 @@ fun EditCommunityDialog(
         title = { Text("Edit Komunitas (Lengkap)") },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text("Klik gambar untuk mengganti:", fontSize = 12.sp, color = Color.Gray)
@@ -248,7 +252,7 @@ fun EditCommunityDialog(
                     Box(
                         modifier = Modifier
                             .size(80.dp)
-                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .background(Color.LightGray)
                             .clickable { logoLauncher.launch("image/*") },
                         contentAlignment = Alignment.Center
@@ -324,7 +328,7 @@ fun CreateCommunityDialog(
         title = { Text("Buat Komunitas Lengkap") },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text("1. Logo & Banner:", fontWeight = FontWeight.Bold, fontSize = 12.sp)

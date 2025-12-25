@@ -1,4 +1,4 @@
-package com.example.hobbyyk_new.view.screen
+package com.example.hobbyyk_new.view.screen.user
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,6 +20,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hobbyyk_new.data.model.Community
 import com.example.hobbyyk_new.utils.Constants
+import com.example.hobbyyk_new.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +70,9 @@ fun CommunityListScreen(navController: NavController) {
     }
 }
 @Composable
-fun CommunityItem(community: Community, onClick: () -> Unit) {
+fun CommunityItem(
+    community: Community,
+    onClick: () -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -78,16 +81,20 @@ fun CommunityItem(community: Community, onClick: () -> Unit) {
             .clickable{ onClick() }
     ) {
         Column {
-            val imageUrl = "${Constants.BASE_URL}uploads/${community.foto_url}"
+            val imageFilename = community.banner_url ?: community.foto_url
+
+            val imageUrl = "${Constants.BASE_URL}uploads/$imageFilename"
+
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
                     .crossfade(true)
                     .build(),
-                contentDescription = "Logo",
+                contentDescription = "Banner Komunitas",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth().height(180.dp)
             )
+
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = community.nama_komunitas, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text(text = "📍 ${community.lokasi}", style = MaterialTheme.typography.bodyMedium)
