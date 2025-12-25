@@ -8,6 +8,7 @@ import com.example.hobbyyk_new.data.model.RegisterRequest
 import com.example.hobbyyk_new.data.model.UpdateCommunityRequest
 import com.example.hobbyyk_new.data.model.UpdateUserRequest
 import com.example.hobbyyk_new.data.model.User
+import com.example.hobbyyk_new.data.model.VerifyOtpRequest
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -15,7 +16,10 @@ import retrofit2.http.*
 
 interface ApiService {
     @POST("users")
-    suspend fun register(@Body request: RegisterRequest): Response<Any>
+    suspend fun register(@Body request: RegisterRequest): Response<Void>
+
+    @POST("verify-otp")
+    suspend fun verifyOtp(@Body request: VerifyOtpRequest): Response<Void>
     @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
@@ -60,7 +64,6 @@ interface ApiService {
     @PATCH("communities/{id}")
     suspend fun updateCommunity(
         @Path("id") id: Int,
-        // Teks Wajib Kirim
         @Part("nama_komunitas") nama: RequestBody,
         @Part("lokasi") lokasi: RequestBody,
         @Part("deskripsi") deskripsi: RequestBody,
@@ -71,6 +74,15 @@ interface ApiService {
         @Part newLogo: MultipartBody.Part?,
         @Part newBanner: MultipartBody.Part?
     ): Response<Void>
+
+    data class ActionRequest(val communityId: Int)
+
+    @POST("like")
+    suspend fun toggleLike(@Body request: ActionRequest): Response<Void>
+
+    // TOGGLE JOIN
+    @POST("join")
+    suspend fun toggleJoin(@Body request: ActionRequest): Response<Void>
     // Endpoint VERIFIKASI OTP (Nanti kita buat modelnya kalau sudah sampai layar OTP)
     // Untuk sementara Login & Register dulu yang penting
 }
