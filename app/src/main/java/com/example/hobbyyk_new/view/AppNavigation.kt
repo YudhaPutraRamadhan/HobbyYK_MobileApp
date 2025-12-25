@@ -1,17 +1,22 @@
 package com.example.hobbyyk_new.view
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.hobbyyk_new.view.screen.AdminCommunityScreen
-import com.example.hobbyyk_new.view.screen.CommunityDetailScreen
-import com.example.hobbyyk_new.view.screen.CommunityListScreen
-import com.example.hobbyyk_new.view.screen.HomeScreen
-import com.example.hobbyyk_new.view.screen.LandingApp
-import com.example.hobbyyk_new.view.screen.LoginScreen
-import com.example.hobbyyk_new.view.screen.SuperAdminDashboard
-import com.example.hobbyyk_new.view.screen.UserListScreen
+import androidx.navigation.navArgument
+import com.example.hobbyyk_new.view.screen.admin.AdminCommunityScreen
+import com.example.hobbyyk_new.view.screen.user.CommunityDetailScreen
+import com.example.hobbyyk_new.view.screen.user.CommunityListScreen
+import com.example.hobbyyk_new.view.screen.user.HomeScreen
+import com.example.hobbyyk_new.view.screen.auth.LandingApp
+import com.example.hobbyyk_new.view.screen.auth.LoginScreen
+import com.example.hobbyyk_new.view.screen.auth.RegisterScreen
+import com.example.hobbyyk_new.view.screen.auth.VerifyOtpScreen
+import com.example.hobbyyk_new.view.screen.superadmin.SuperAdminCommunityList
+import com.example.hobbyyk_new.view.screen.superadmin.SuperAdminDashboard
+import com.example.hobbyyk_new.view.screen.superadmin.UserListScreen
 
 @Composable
 fun AppNavigation() {
@@ -31,6 +36,7 @@ fun AppNavigation() {
 
         composable("login") {
             LoginScreen(
+                navController = navController,
                 onLoginSuccess = { role ->
                     if (role == "super_admin" || role == "admin") {
 
@@ -44,6 +50,14 @@ fun AppNavigation() {
                     }
                 }
             )
+        }
+
+        composable(
+            route = "verify_otp/{email}",
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            VerifyOtpScreen(navController = navController, email = email)
         }
 
         composable(
@@ -78,5 +92,12 @@ fun AppNavigation() {
         composable("admin_community_list") {
             AdminCommunityScreen(navController)
         }
+        composable("super_admin_communities") {
+            SuperAdminCommunityList(navController = navController)
+        }
+        composable("register") {
+            RegisterScreen(navController = navController)
+        }
+
     }
 }
