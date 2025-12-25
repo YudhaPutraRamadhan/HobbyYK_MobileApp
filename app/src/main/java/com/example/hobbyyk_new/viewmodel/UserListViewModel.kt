@@ -1,4 +1,4 @@
-package com.example.hobbyyk_new.view.screen
+package com.example.hobbyyk_new.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

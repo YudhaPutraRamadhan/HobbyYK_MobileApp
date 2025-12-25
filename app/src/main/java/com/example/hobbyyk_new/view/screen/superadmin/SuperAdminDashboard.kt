@@ -1,4 +1,4 @@
-package com.example.hobbyyk_new.view.screen
+package com.example.hobbyyk_new.view.screen.superadmin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -61,7 +61,7 @@ fun SuperAdminDashboard(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController.navigate("admin_community_list") },
+                onClick = { navController.navigate("super_admin_communities") },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
             ) {

@@ -1,8 +1,7 @@
-package com.example.hobbyyk_new.view.screen
+package com.example.hobbyyk_new.view.screen.superadmin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.FloatingActionButton
@@ -26,11 +25,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.hobbyyk_new.data.model.User
+import com.example.hobbyyk_new.viewmodel.UserListViewModel
+import androidx.compose.foundation.lazy.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserListScreen(navController: androidx.navigation.NavController) {
+fun UserListScreen(navController: NavController) {
     val viewModel: UserListViewModel = viewModel()
 
     var showEditDialog by remember { mutableStateOf(false) }
