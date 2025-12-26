@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
@@ -73,6 +74,17 @@ fun AdminDashboard(navController: NavController) {
         topBar = {
             TopAppBar(
                 title = { Text("Dashboard Admin") },
+                actions = {
+                    IconButton(onClick = {
+                        navController.navigate("profile")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Profil",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             )
         }
@@ -117,26 +129,6 @@ fun AdminDashboard(navController: NavController) {
                 Text("Fitur jelajah akan tampil di sini...", color = Color.Gray, fontSize = 14.sp)
 
                 Spacer(modifier = Modifier.height(24.dp))
-            }
-
-            item {
-                OutlinedButton(
-                    onClick = {
-                        scope.launch {
-                            userStore.clearSession()
-                            navController.navigate("login") {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.Red),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
-                ) {
-                    Text("Keluar (Logout)")
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
