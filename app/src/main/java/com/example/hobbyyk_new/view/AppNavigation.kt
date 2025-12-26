@@ -6,9 +6,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.hobbyyk_new.view.screen.admin.ActivityFormScreen
+import com.example.hobbyyk_new.view.screen.user.ActivityListScreen
 import com.example.hobbyyk_new.view.screen.admin.AdminDashboard
 import com.example.hobbyyk_new.view.screen.admin.CreateCommunityScreen
 import com.example.hobbyyk_new.view.screen.admin.EditCommunityScreen
+import com.example.hobbyyk_new.view.screen.admin.activity.ActivityDetailScreen
 import com.example.hobbyyk_new.view.screen.user.CommunityDetailScreen
 import com.example.hobbyyk_new.view.screen.user.CommunityListScreen
 import com.example.hobbyyk_new.view.screen.user.HomeScreen
@@ -115,10 +118,45 @@ fun AppNavigation() {
 
         composable(
             route = "edit_community/{communityId}",
-            arguments = listOf(androidx.navigation.navArgument("communityId") { type = androidx.navigation.NavType.IntType })
+            arguments = listOf(navArgument("communityId") { type = NavType.IntType })
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getInt("communityId") ?: 0
             EditCommunityScreen(navController = navController, communityId = id)
+        }
+
+        composable(
+            route = "create_activity/{communityId}?activityId={activityId}",
+            arguments = listOf(
+                navArgument("communityId") { type = NavType.IntType },
+                navArgument("activityId") {
+                    type = NavType.IntType
+                    defaultValue = 0
+                }
+            )
+        ) { backStackEntry ->
+            val commId = backStackEntry.arguments?.getInt("communityId") ?: 0
+            val actId = backStackEntry.arguments?.getInt("activityId") ?: 0
+
+            ActivityFormScreen(navController, commId, actId)
+        }
+
+        composable(
+            route = "activity_list/{communityId}",
+            arguments = listOf(
+                navArgument("communityId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("communityId") ?: 0
+
+            ActivityListScreen(navController, id)
+        }
+
+        composable(
+            route = "detail_activity/{activityId}",
+            arguments = listOf(navArgument("activityId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("activityId") ?: 0
+            ActivityDetailScreen(navController, id)
         }
     }
 }

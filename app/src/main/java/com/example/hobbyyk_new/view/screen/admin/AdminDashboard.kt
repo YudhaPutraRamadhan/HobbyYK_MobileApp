@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
@@ -37,7 +38,6 @@ import com.example.hobbyyk_new.data.datastore.UserStore
 fun AdminDashboard(navController: NavController) {
     val viewModel: AdminCommunityViewModel = viewModel()
     val context = LocalContext.current
-
     val scope = rememberCoroutineScope()
     val userStore = UserStore(context)
 
@@ -97,8 +97,19 @@ fun AdminDashboard(navController: NavController) {
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            if (viewModel.myCommunity != null && !viewModel.isLoading) {
+                item {
+                    ActivityManagerCard(
+                        onClick = {
+                            navController.navigate("activity_list/${viewModel.myCommunity!!.id}")
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
 
             item {
@@ -125,9 +136,56 @@ fun AdminDashboard(navController: NavController) {
                     Text("Keluar (Logout)")
                 }
 
-                // Tambahan ruang kosong di bawah tombol biar gak mepet layar
                 Spacer(modifier = Modifier.height(20.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun ActivityManagerCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Event,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Aktivitas Komunitas",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "Kelola jadwal mabar, gathering, dll.",
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+            }
+
+            Icon(Icons.Default.Settings, contentDescription = null, tint = Color.Gray)
         }
     }
 }
