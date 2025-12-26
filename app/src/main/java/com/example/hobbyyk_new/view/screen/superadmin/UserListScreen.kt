@@ -185,7 +185,6 @@ fun UserCard(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    // Badge Verified (Penting buat OTP)
                     if (user.isVerified) {
                         Icon(Icons.Default.CheckCircle, contentDescription = "Verified", tint = Color(0xFF4CAF50), modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(2.dp))

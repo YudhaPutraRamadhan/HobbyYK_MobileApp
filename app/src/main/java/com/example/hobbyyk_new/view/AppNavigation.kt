@@ -22,6 +22,10 @@ import com.example.hobbyyk_new.view.screen.auth.VerifyOtpScreen
 import com.example.hobbyyk_new.view.screen.superadmin.SuperAdminCommunityList
 import com.example.hobbyyk_new.view.screen.superadmin.SuperAdminDashboard
 import com.example.hobbyyk_new.view.screen.superadmin.UserListScreen
+import com.example.hobbyyk_new.view.screen.user.EditProfileScreen
+import com.example.hobbyyk_new.view.screen.user.ProfileScreen
+import com.example.hobbyyk_new.view.screen.user.VerifyChangeEmailScreen
+import com.example.hobbyyk_new.view.screen.user.VerifyChangePassScreen
 
 @Composable
 fun AppNavigation() {
@@ -157,6 +161,26 @@ fun AppNavigation() {
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getInt("activityId") ?: 0
             ActivityDetailScreen(navController, id)
+        }
+
+        composable("profile") {
+            ProfileScreen(navController)
+        }
+
+        composable("edit_profile") {
+            EditProfileScreen(navController)
+        }
+
+        composable("verify_change_pass") {
+            VerifyChangePassScreen(navController)
+        }
+
+        composable(
+            route = "verify_change_email/{newEmail}",
+            arguments = listOf(navArgument("newEmail") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val newEmail = backStackEntry.arguments?.getString("newEmail") ?: ""
+            VerifyChangeEmailScreen(navController, newEmail)
         }
     }
 }
