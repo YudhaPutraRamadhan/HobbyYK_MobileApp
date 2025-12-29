@@ -22,6 +22,7 @@ import com.example.hobbyyk_new.view.screen.auth.VerifyOtpScreen
 import com.example.hobbyyk_new.view.screen.superadmin.SuperAdminCommunityList
 import com.example.hobbyyk_new.view.screen.superadmin.SuperAdminDashboard
 import com.example.hobbyyk_new.view.screen.superadmin.UserListScreen
+import com.example.hobbyyk_new.view.screen.user.ActivityFeedScreen
 import com.example.hobbyyk_new.view.screen.user.EditProfileScreen
 import com.example.hobbyyk_new.view.screen.user.ProfileScreen
 import com.example.hobbyyk_new.view.screen.user.VerifyChangeEmailScreen
@@ -181,6 +182,10 @@ fun AppNavigation() {
         ) { backStackEntry ->
             val newEmail = backStackEntry.arguments?.getString("newEmail") ?: ""
             VerifyChangeEmailScreen(navController, newEmail)
+        }
+
+        composable("activity_feed") {
+            ActivityFeedScreen(navController)
         }
     }
 }
