@@ -22,5 +22,5 @@ data class ProfileResponse(
 data class CommunitySimple(
     val id: Int,
     val nama_komunitas: String,
-    val logo: String?
+    val foto_url: String?
 )

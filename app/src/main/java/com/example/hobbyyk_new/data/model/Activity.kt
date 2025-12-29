@@ -10,5 +10,6 @@ data class Activity(
     val foto_kegiatan: String?,
     val communityId: Int,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    val community: CommunitySimple?
 )

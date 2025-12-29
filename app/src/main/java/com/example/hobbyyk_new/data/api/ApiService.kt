@@ -125,6 +125,7 @@ interface ApiService {
     @Multipart
     @PATCH("users/profile")
     suspend fun updateProfile(
+        @Part("username") username: RequestBody,
         @Part("bio") bio: RequestBody,
         @Part("no_hp") noHp: RequestBody,
         @Part profile_pic: MultipartBody.Part?
@@ -147,4 +148,7 @@ interface ApiService {
     suspend fun verifyChangeEmail(
         @Body request: com.example.hobbyyk_new.data.model.VerifyEmailRequest
     ): Response<GenericResponse>
+
+    @GET("activities/feed")
+    suspend fun getAllActivities(): Response<List<Activity>>
 }
