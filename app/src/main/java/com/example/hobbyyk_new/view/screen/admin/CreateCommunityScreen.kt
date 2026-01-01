@@ -184,7 +184,7 @@ fun CreateCommunityScreen(navController: NavController) {
 
             OutlinedTextField(
                 value = linkGrup, onValueChange = { linkGrup = it },
-                label = { Text("Link Grup WhatsApp/Discord") },
+                label = { Text("Link Grup WhatsApp") },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("https://...") }
             )
