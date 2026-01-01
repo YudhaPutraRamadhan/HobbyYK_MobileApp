@@ -73,25 +73,6 @@ fun HomeScreen(navController: NavController) {
                 icon = Icons.Default.Event,
                 onClick = { navController.navigate("activity_feed") }
             )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        userStore.clearSession()
-
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
-                border = BorderStroke(1.dp, Color.Red)
-            ) {
-                Text("Keluar (Logout)")
-            }
         }
     }
 }
