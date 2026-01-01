@@ -39,12 +39,14 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    // Load data komunitas saat pertama kali dibuka
-    LaunchedEffect(Unit) {
-        viewModel.fetchMyCommunity()
+    LaunchedEffect(communityId) {
+        // [PERBAIKAN 2] Panggil fungsi fetch by ID, bukan fetchMyCommunity
+        // Pastikan fungsi 'fetchCommunityById' atau sejenisnya ada di ViewModel kamu!
+        // Jika belum ada, buat fungsi di AdminCommunityViewModel yang isinya:
+        // getCommunityById(id) -> update state 'myCommunity'
+        viewModel.fetchCommunityById(communityId)
     }
 
-    // State Form (Diisi setelah data dari API masuk)
     var nama by remember { mutableStateOf("") }
     var kategori by remember { mutableStateOf("") }
     var deskripsi by remember { mutableStateOf("") }
@@ -52,25 +54,20 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
     var kontak by remember { mutableStateOf("") }
     var linkGrup by remember { mutableStateOf("") }
 
-    // State Gambar Baru (Jika user ingin ganti)
     var newLogoUri by remember { mutableStateOf<Uri?>(null) }
     var newBannerUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Jika data dari ViewModel sudah siap, isi form-nya
     LaunchedEffect(viewModel.myCommunity) {
         viewModel.myCommunity?.let {
-            if (nama.isEmpty()) { // Biar gak ketimpa saat ngetik ulang
-                nama = it.nama_komunitas
-                kategori = it.kategori
-                deskripsi = it.deskripsi
-                lokasi = it.lokasi
-                kontak = it.kontak ?: ""
-                linkGrup = it.link_grup ?: ""
-            }
+            nama = it.nama_komunitas
+            kategori = it.kategori
+            deskripsi = it.deskripsi ?: ""
+            lokasi = it.lokasi ?: ""
+            kontak = it.kontak ?: ""
+            linkGrup = it.link_grup ?: ""
         }
     }
 
-    // Launcher Gambar
     val logoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { newLogoUri = it }
     val bannerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { newBannerUri = it }
 
@@ -86,6 +83,7 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
             )
         }
     ) { paddingValues ->
+        // Loading state visual
         if (viewModel.isLoading && nama.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -116,10 +114,8 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                                 .clickable { logoLauncher.launch("image/*") }
                         ) {
                             if (newLogoUri != null) {
-                                // Tampilkan Preview Gambar Baru
                                 AsyncImage(model = newLogoUri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                             } else {
-                                // Tampilkan Gambar Lama dari Server
                                 val oldLogo = "${Constants.URL_GAMBAR_BASE}${viewModel.myCommunity?.foto_url}"
                                 AsyncImage(model = oldLogo, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                             }
