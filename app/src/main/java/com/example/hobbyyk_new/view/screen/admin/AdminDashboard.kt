@@ -30,9 +30,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hobbyyk_new.utils.Constants
 import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.example.hobbyyk_new.data.datastore.UserStore
+import com.example.hobbyyk_new.data.model.Community
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +40,6 @@ fun AdminDashboard(navController: NavController) {
     val viewModel: AdminCommunityViewModel = viewModel()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val userStore = UserStore(context)
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -97,13 +96,14 @@ fun AdminDashboard(navController: NavController) {
             }
 
             item {
+                // Perbaikan parameter navigasi agar sinkron dengan AppNavigation
                 MyCommunityCard(
                     community = viewModel.myCommunity,
                     isLoading = viewModel.isLoading,
                     onCreateClick = { navController.navigate("create_community") },
                     onEditClick = { id -> navController.navigate("edit_community/$id") },
                     onDetailClick = { id ->
-                        navController.navigate("detail_community/$id?isAdmin=true")
+                        navController.navigate("admin_community_detail/$id")
                     },
                     onDeleteClick = { showDeleteDialog = true }
                 )
@@ -184,7 +184,7 @@ fun ActivityManagerCard(onClick: () -> Unit) {
 
 @Composable
 fun MyCommunityCard(
-    community: com.example.hobbyyk_new.data.model.Community?,
+    community: Community?,
     isLoading: Boolean,
     onCreateClick: () -> Unit,
     onEditClick: (Int) -> Unit,

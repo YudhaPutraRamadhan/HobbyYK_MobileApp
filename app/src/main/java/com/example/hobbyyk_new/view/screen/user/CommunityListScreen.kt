@@ -61,7 +61,7 @@ fun CommunityListScreen(navController: NavController) {
                     CommunityItem(
                         community = community,
                         onClick = {
-                            navController.navigate("detail_community/${community.id}")
+                            navController.navigate("community_detail/${community.id}")
                         }
                     )
                 }

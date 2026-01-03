@@ -76,7 +76,7 @@ fun ActivityFeedScreen(navController: NavController) {
                             onClick = { navController.navigate("detail_activity/${activity.id}")
                             },
                             onCommunityClick = { communityId ->
-                                navController.navigate("detail_community/$communityId")
+                                navController.navigate("community_detail/$communityId")
                             }
                         )
                     }

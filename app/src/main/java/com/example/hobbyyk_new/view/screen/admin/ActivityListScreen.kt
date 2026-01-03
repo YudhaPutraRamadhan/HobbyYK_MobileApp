@@ -86,7 +86,7 @@ fun ActivityListScreen(navController: NavController, communityId: Int) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate("create_activity/$communityId")
+                    navController.navigate("activity_form/$communityId/0")
                 },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
@@ -109,7 +109,7 @@ fun ActivityListScreen(navController: NavController, communityId: Int) {
                                 showDeleteDialog = true
                             },
                             onEdit = {
-                                navController.navigate("create_activity/$communityId?activityId=${activity.id}")
+                                navController.navigate("activity_form/$communityId/${activity.id}")
                             },
                             onDetail = {
                                 navController.navigate("detail_activity/${activity.id}")

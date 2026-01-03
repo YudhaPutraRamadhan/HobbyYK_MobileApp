@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.hobbyyk_new.utils.Constants
 import com.example.hobbyyk_new.viewmodel.CommunityDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,7 +125,7 @@ fun CommunityDetailScreen(
                 ) {
                     Box(modifier = Modifier.height(200.dp).fillMaxWidth()) {
                         AsyncImage(
-                            model = "http://10.0.2.2:5000/uploads/${data.banner_url ?: data.foto_url}",
+                            model = "${Constants.URL_GAMBAR_BASE}${data.banner_url ?: data.foto_url}",
                             contentDescription = "Banner",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -134,7 +135,7 @@ fun CommunityDetailScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             AsyncImage(
-                                model = "http://10.0.2.2:5000/uploads/${data.foto_url}",
+                                model = "${Constants.URL_GAMBAR_BASE}${data.foto_url}",
                                 contentDescription = "Logo",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
