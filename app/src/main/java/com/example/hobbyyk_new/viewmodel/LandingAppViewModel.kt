@@ -32,9 +32,9 @@ class LandingAppViewModel(application: Application) : AndroidViewModel(applicati
                 RetrofitClient.authToken = token
 
                 startDestination = when (role) {
-                    "super_admin" -> "super_admin_dashboard"
-                    "admin_komunitas" -> "admin_dashboard"
-                    else -> "home"
+                    "super_admin" -> "super_admin_graph"
+                    "admin_komunitas" -> "admin_graph"
+                    else -> "user_graph"
                 }
 
             } else {
