@@ -28,8 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun LoginScreen(
-    navController: NavController,
-    onLoginSuccess: (String) -> Unit
+    navController: NavController
 ) {
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
@@ -38,9 +37,15 @@ fun LoginScreen(
 
     LaunchedEffect(viewModel.isLoginSuccess) {
         if (viewModel.isLoginSuccess) {
-            Toast.makeText(context, "Login Berhasil!", Toast.LENGTH_SHORT).show()
+            val route = when (viewModel.userRole) {
+                "super_admin" -> "super_admin_graph"
+                "admin_komunitas" -> "admin_graph"
+                else -> "user_graph"
+            }
 
-            onLoginSuccess(viewModel.userRole)
+            navController.navigate(route) {
+                popUpTo("auth_graph") { inclusive = true }
+            }
         }
     }
 
