@@ -61,7 +61,7 @@ fun SuperAdminDashboard(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController.navigate("super_admin_communities") },
+                onClick = { navController.navigate("super_admin_community_list") },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
             ) {

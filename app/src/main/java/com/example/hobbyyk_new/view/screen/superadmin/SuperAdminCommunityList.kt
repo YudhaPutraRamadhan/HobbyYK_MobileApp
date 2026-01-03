@@ -94,7 +94,7 @@ fun SuperAdminCommunityList(navController: NavController) {
                         SuperAdminCommunityItem(
                             community = community,
                             onClick = {
-                                navController.navigate("detail_community/${community.id}?isAdmin=true")
+                                navController.navigate("admin_community_detail/${community.id}")
                             },
                             onEdit = {
                                 navController.navigate("edit_community/${community.id}")
