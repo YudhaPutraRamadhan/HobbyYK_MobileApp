@@ -16,15 +16,25 @@ class HomeViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
+    var searchQuery by mutableStateOf("")
+    var selectedCategory by mutableStateOf("Semua")
+
     init {
         fetchCommunities()
     }
 
-    fun fetchCommunities() {
+    fun fetchCommunities(
+        query: String? = null,
+        category: String? = null
+    ) {
         viewModelScope.launch {
             isLoading = true
             try {
-                val response = RetrofitClient.instance.getCommunities()
+                val response = RetrofitClient.instance.getCommunities(
+                    search = query,
+                    category = if (category == "Semua") null else category
+                )
+
                 if (response.isSuccessful) {
                     communities = response.body() ?: emptyList()
                     Log.d("HomeViewModel", "Dapat ${communities.size} komunitas")
