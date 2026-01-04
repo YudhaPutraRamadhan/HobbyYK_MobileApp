@@ -3,13 +3,17 @@ package com.example.hobbyyk_new.view.screen.superadmin
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,8 +39,15 @@ fun SuperAdminCommunityList(navController: NavController) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var communityToDelete by remember { mutableStateOf<Community?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchAllCommunities()
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("Semua") }
+    val categories = listOf("Semua") + Constants.COMMUNITY_CATEGORIES
+
+    LaunchedEffect(searchQuery, selectedCategory) {
+        viewModel.fetchAllCommunities(
+            search = searchQuery.ifEmpty { null },
+            category = if (selectedCategory == "Semua") null else selectedCategory
+        )
     }
 
     if (showDeleteDialog && communityToDelete != null) {
@@ -82,28 +93,83 @@ fun SuperAdminCommunityList(navController: NavController) {
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-            if (viewModel.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(viewModel.communities) { community ->
-                        SuperAdminCommunityItem(
-                            community = community,
-                            onClick = {
-                                navController.navigate("admin_community_detail/${community.id}")
-                            },
-                            onEdit = {
-                                navController.navigate("edit_community/${community.id}")
-                            },
-                            onDelete = {
-                                communityToDelete = community
-                                showDeleteDialog = true
-                            }
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text("Cari nama komunitas...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = null)
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                items(categories) { category ->
+                    FilterChip(
+                        selected = selectedCategory == category,
+                        onClick = { selectedCategory = category },
+                        label = { Text(category) },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
+                    )
+                }
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (viewModel.communities.isEmpty()) {
+                    Text(
+                        text = "Tidak ada komunitas ditemukan.",
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.Gray
+                    )
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(viewModel.communities) { community ->
+                            SuperAdminCommunityItem(
+                                community = community,
+                                onClick = {
+                                    navController.navigate("admin_community_detail/${community.id}")
+                                },
+                                onEdit = {
+                                    navController.navigate("edit_community/${community.id}")
+                                },
+                                onDelete = {
+                                    communityToDelete = community
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
                     }
                 }
             }

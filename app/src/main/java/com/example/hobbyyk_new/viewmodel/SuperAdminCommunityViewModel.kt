@@ -14,18 +14,15 @@ class SuperAdminCommunityViewModel : ViewModel() {
     var isLoading by mutableStateOf(true)
     var errorMessage by mutableStateOf<String?>(null)
 
-    fun fetchAllCommunities() {
+    fun fetchAllCommunities(search: String? = null, category: String? = null) {
         viewModelScope.launch {
             isLoading = true
             try {
-                val response = RetrofitClient.instance.getCommunities()
+                val response = RetrofitClient.instance.getCommunities(search, category)
                 if (response.isSuccessful) {
                     communities = response.body() ?: emptyList()
-                } else {
-                    errorMessage = "Gagal memuat: ${response.message()}"
                 }
             } catch (e: Exception) {
-                errorMessage = "Error: ${e.message}"
             } finally {
                 isLoading = false
             }
