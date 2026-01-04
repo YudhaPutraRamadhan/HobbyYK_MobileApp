@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,12 +22,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hobbyyk_new.utils.Constants
+import com.example.hobbyyk_new.view.screen.auth.LabelText
 import com.example.hobbyyk_new.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,34 +38,17 @@ import com.example.hobbyyk_new.viewmodel.ProfileViewModel
 fun EditProfileScreen(navController: NavController) {
     val viewModel: ProfileViewModel = viewModel()
     val context = LocalContext.current
-
     var username by remember { mutableStateOf ("") }
     var bio by remember { mutableStateOf("") }
     var noHp by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchProfile()
-    }
-
+    LaunchedEffect(Unit) { viewModel.fetchProfile() }
     LaunchedEffect(viewModel.userProfile) {
         viewModel.userProfile?.let {
             if (username.isEmpty()) username = it.username
             if (bio.isEmpty()) bio = it.bio ?: ""
             if (noHp.isEmpty()) noHp = it.no_hp ?: ""
-        }
-    }
-
-    LaunchedEffect(viewModel.message) {
-        viewModel.message?.let {
-            if (it.contains("berhasil", ignoreCase = true)) {
-                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                viewModel.clearMessage()
-                navController.popBackStack() // Kembali ke halaman Profil setelah simpan
-            } else {
-                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                viewModel.clearMessage()
-            }
         }
     }
 
@@ -71,11 +58,11 @@ fun EditProfileScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Edit Profil") },
+            TopAppBar(
+                title = { Text("Edit Profil", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 }
             )
@@ -89,73 +76,73 @@ fun EditProfileScreen(navController: NavController) {
                     .padding(paddingValues)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(contentAlignment = Alignment.BottomEnd) {
-                    val model = if (selectedImageUri != null) selectedImageUri else
-                        "${Constants.URL_GAMBAR_BASE}${viewModel.userProfile?.profile_pic}"
-
+                Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.clickable { imageLauncher.launch("image/*") }) {
                     AsyncImage(
-                        model = ImageRequest.Builder(context).data(model).crossfade(true).build(),
+                        model = ImageRequest.Builder(context).data(selectedImageUri ?: "${Constants.URL_GAMBAR_BASE}${viewModel.userProfile?.profile_pic}").crossfade(true).build(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(120.dp)
+                            .size(140.dp)
                             .clip(CircleShape)
                             .background(Color.LightGray)
-                            .clickable { imageLauncher.launch("image/*") }
                     )
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .clickable { imageLauncher.launch("image/*") },
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape,
+                        shadowElevation = 4.dp,
+                        modifier = Modifier.size(40.dp)
                     ) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.CameraAlt, null, tint = Color.White, modifier = Modifier.padding(8.dp))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
+                LabelText("Username")
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username") },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
                     singleLine = true
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                OutlinedTextField(
-                    value = bio, onValueChange = { bio = it },
-                    label = { Text("Bio / Status") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
-                )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                LabelText("Bio")
                 OutlinedTextField(
-                    value = noHp, onValueChange = { noHp = it },
-                    label = { Text("Nomor HP") },
-                    modifier = Modifier.fillMaxWidth()
+                    value = bio, onValueChange = { bio = it },
+                    placeholder = { Text("Ceritakan sedikit hobi Anda...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    minLines = 3
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LabelText("Nomor HP")
+                OutlinedTextField(
+                    value = noHp, onValueChange = { noHp = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone)
+                )
+
+                Spacer(modifier = Modifier.height(48.dp))
 
                 Button(
-                    onClick = {
-                        viewModel.updateProfile(username, bio, noHp, selectedImageUri, context)
-                    },
-                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                    onClick = { viewModel.updateProfile(username, bio, noHp, selectedImageUri, context) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = !viewModel.isLoading
                 ) {
                     if (viewModel.isLoading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
-                        Text("Simpan Perubahan")
+                        Text("Simpan Perubahan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

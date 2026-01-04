@@ -45,8 +45,8 @@ fun ActivityFeedScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Aktivitas Terbaru", fontWeight = FontWeight.Bold) },
+            TopAppBar(
+                title = { Text("Aktivitas Terbaru", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -55,7 +55,7 @@ fun ActivityFeedScreen(navController: NavController) {
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
             if (viewModel.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (viewModel.feedList.isEmpty()) {
@@ -63,18 +63,17 @@ fun ActivityFeedScreen(navController: NavController) {
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("Belum ada aktivitas apapun.", color = Color.Gray)
+                    Text("Belum ada aktivitas baru.", color = Color.Gray)
                 }
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     items(viewModel.feedList) { activity ->
                         FeedItemCard(
                             activity = activity,
-                            onClick = { navController.navigate("detail_activity/${activity.id}")
-                            },
+                            onClick = { navController.navigate("detail_activity/${activity.id}") },
                             onCommunityClick = { communityId ->
                                 navController.navigate("community_detail/$communityId")
                             }
@@ -96,27 +95,23 @@ fun FeedItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp),
+        elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            activity.community?.id?.let { id -> onCommunityClick(id) }
-                        }
-                        .padding(4.dp),
+                        .weight(1f)
+                        .clickable { activity.community?.id?.let { onCommunityClick(it) } },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Logo
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data("${Constants.URL_GAMBAR_BASE}${activity.community?.foto_url}")
@@ -124,76 +119,67 @@ fun FeedItemCard(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
-                            .background(Color.LightGray)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    // Teks Nama & Tanggal
                     Column {
                         Text(
-                            text = activity.community?.nama_komunitas ?: "Komunitas HobbyYk",
+                            text = activity.community?.nama_komunitas ?: "HobbyYK Community",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Diposting pada ${activity.tanggal}",
-                            fontSize = 12.sp,
+                            text = activity.tanggal,
+                            fontSize = 11.sp,
                             color = Color.Gray
                         )
                     }
                 }
             }
 
-            // --- BODY: GAMBAR & KONTEN ---
-            // Area ini otomatis ikut klik Card utama (onClick)
-            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+            val firstImage = remember(activity.foto_kegiatan) {
+                try {
+                    val jsonArray = JSONArray(activity.foto_kegiatan)
+                    if (jsonArray.length() > 0) jsonArray.getString(0) else null
+                } catch (e: Exception) { null }
+            }
 
-                val firstImage = remember(activity.foto_kegiatan) {
-                    try {
-                        val jsonArray = JSONArray(activity.foto_kegiatan)
-                        if (jsonArray.length() > 0) jsonArray.getString(0) else null
-                    } catch (e: Exception) { null }
-                }
+            if (firstImage != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("${Constants.URL_GAMBAR_BASE}$firstImage")
+                        .crossfade(true).build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(horizontal = 16.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+            }
 
-                if (firstImage != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data("${Constants.URL_GAMBAR_BASE}$firstImage")
-                            .crossfade(true).build(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color.LightGray)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = activity.judul_kegiatan,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     fontSize = 18.sp,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(activity.lokasi, fontSize = 12.sp, color = Color.Gray, maxLines = 1)
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(activity.tanggal, fontSize = 12.sp, color = Color.Gray)
+                    Text(activity.lokasi, fontSize = 12.sp, color = Color.Gray)
                 }
             }
         }

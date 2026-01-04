@@ -42,9 +42,7 @@ fun ActivityDetailScreen(
     activityId: Int
 ) {
     val viewModel: ActivityViewModel = viewModel()
-
     var selectedImageForFullscreen by remember { mutableStateOf<String?>(null) }
-
     val blurRadius by animateDpAsState(
         targetValue = if (selectedImageForFullscreen != null) 15.dp else 0.dp,
         label = "blur"
@@ -54,30 +52,19 @@ fun ActivityDetailScreen(
         viewModel.getActivityDetail(activityId)
     }
 
+    // Fullscreen Image View (Tetap mempertahankan logika aslimu)
     if (selectedImageForFullscreen != null) {
         Dialog(
             onDismissRequest = { selectedImageForFullscreen = null },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                decorFitsSystemWindows = false
-            )
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        selectedImageForFullscreen = null
-                    },
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.9f)).clickable { selectedImageForFullscreen = null },
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data("${Constants.URL_GAMBAR_BASE}$selectedImageForFullscreen")
-                        .crossfade(true).build(),
-                    contentDescription = "Full Screen Image",
+                    model = "${Constants.URL_GAMBAR_BASE}$selectedImageForFullscreen",
+                    contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -88,11 +75,11 @@ fun ActivityDetailScreen(
     Scaffold(
         modifier = Modifier.blur(blurRadius),
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Detail Aktivitas") },
+            TopAppBar(
+                title = { Text("Detail Aktivitas", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 }
             )
@@ -103,75 +90,88 @@ fun ActivityDetailScreen(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (viewModel.selectedActivity != null) {
                 val data = viewModel.selectedActivity!!
+                val images = remember(data.foto_kegiatan) {
+                    try {
+                        val jsonArray = JSONArray(data.foto_kegiatan)
+                        List(jsonArray.length()) { jsonArray.getString(it) }
+                    } catch (e: Exception) { emptyList() }
+                }
 
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
+                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 ) {
-                    val images = remember(data.foto_kegiatan) {
-                        try {
-                            val jsonArray = JSONArray(data.foto_kegiatan)
-                            val list = mutableListOf<String>()
-                            for (i in 0 until jsonArray.length()) {
-                                list.add(jsonArray.getString(i))
-                            }
-                            list
-                        } catch (e: Exception) { emptyList<String>() }
-                    }
-
+                    // Modern Gallery Grid
                     if (images.isNotEmpty()) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().height(200.dp),
+                            modifier = Modifier.fillMaxWidth().height(220.dp).padding(16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             images.forEach { imgName ->
                                 AsyncImage(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data("${Constants.URL_GAMBAR_BASE}$imgName")
-                                        .crossfade(true).build(),
+                                    model = "${Constants.URL_GAMBAR_BASE}$imgName",
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color.LightGray)
-                                        .clickable {
-                                            selectedImageForFullscreen = imgName
-                                        }
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .clickable { selectedImageForFullscreen = imgName }
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(24.dp))
                     }
 
-                    Text(data.judul_kegiatan, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
+                        Text(
+                            text = data.judul_kegiatan,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 32.sp
+                        )
 
-                    InfoRow(Icons.Default.CalendarToday, data.tanggal)
-                    InfoRow(Icons.Default.AccessTime, data.waktu)
-                    InfoRow(Icons.Default.LocationOn, data.lokasi)
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                        // Info Cards Section
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                DetailInfoRow(Icons.Default.CalendarToday, "Tanggal", data.tanggal)
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), thickness = 0.5.dp)
+                                DetailInfoRow(Icons.Default.AccessTime, "Waktu", data.waktu)
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), thickness = 0.5.dp)
+                                DetailInfoRow(Icons.Default.LocationOn, "Lokasi", data.lokasi)
+                            }
+                        }
 
-                    Text("Deskripsi", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(data.deskripsi, lineHeight = 24.sp, color = Color.DarkGray)
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        Text("Deskripsi Kegiatan", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(
+                            text = data.deskripsi,
+                            modifier = Modifier.padding(top = 12.dp, bottom = 40.dp),
+                            lineHeight = 24.sp,
+                            color = Color.DarkGray
+                        )
+                    }
                 }
-            } else {
-                Text("Gagal memuat data", modifier = Modifier.align(Alignment.Center))
             }
         }
     }
 }
 
 @Composable
-fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
-    Row(modifier = Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text, fontSize = 16.sp)
+fun DetailInfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(label, fontSize = 11.sp, color = Color.Gray)
+            Text(value, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        }
     }
 }

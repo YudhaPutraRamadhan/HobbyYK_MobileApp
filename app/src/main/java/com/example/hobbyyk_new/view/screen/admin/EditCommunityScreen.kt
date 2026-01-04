@@ -8,10 +8,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +31,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hobbyyk_new.utils.Constants
 import com.example.hobbyyk_new.utils.uriToFile
+import com.example.hobbyyk_new.view.screen.auth.LabelText
 import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,9 +41,7 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(communityId) {
-        viewModel.fetchCommunityById(communityId)
-    }
+    LaunchedEffect(communityId) { viewModel.fetchCommunityById(communityId) }
 
     var nama by remember { mutableStateOf("") }
     var kategori by remember { mutableStateOf("") }
@@ -51,7 +52,6 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
 
     var newLogoUri by remember { mutableStateOf<Uri?>(null) }
     var newBannerUri by remember { mutableStateOf<Uri?>(null) }
-
     var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel.myCommunity) {
@@ -70,8 +70,8 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Edit Profil Komunitas", fontWeight = FontWeight.Bold) },
+            TopAppBar(
+                title = { Text("Edit Profil Komunitas", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -86,168 +86,100 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
             }
         } else {
             Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(scrollState)
+                modifier = Modifier.padding(paddingValues).fillMaxSize().padding(horizontal = 24.dp).verticalScroll(scrollState)
             ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text("Visual Community", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = MaterialTheme.colorScheme.primary)
+                Text("Klik pada gambar untuk mengganti aset.", fontSize = 12.sp, color = Color.Gray)
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Update Visual", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("Klik gambar untuk mengubah", fontSize = 12.sp, color = Color.Gray)
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // Logo Update
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.LightGray.copy(alpha = 0.3f))
-                                .clickable { logoLauncher.launch("image/*") }
+                            modifier = Modifier.size(100.dp).clip(RoundedCornerShape(20.dp)).background(Color.LightGray.copy(alpha = 0.2f)).clickable { logoLauncher.launch("image/*") }
                         ) {
                             val model = newLogoUri ?: "${Constants.URL_GAMBAR_BASE}${viewModel.myCommunity?.foto_url}"
-                            AsyncImage(
-                                model = ImageRequest.Builder(context).data(model).crossfade(true).build(),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
+                            AsyncImage(model = ImageRequest.Builder(context).data(model).crossfade(true).build(), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                            Surface(Modifier.align(Alignment.BottomEnd).padding(4.dp), shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
+                                Icon(Icons.Default.AddPhotoAlternate, null, tint = Color.White, modifier = Modifier.size(20.dp).padding(4.dp))
+                            }
                         }
-                        Text("Logo", fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                     }
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(2f)) {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .height(100.dp)
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.LightGray.copy(alpha = 0.3f))
-                                .clickable { bannerLauncher.launch("image/*") }
+                            modifier = Modifier.height(100.dp).fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.LightGray.copy(alpha = 0.2f)).clickable { bannerLauncher.launch("image/*") }
                         ) {
                             val bannerModel = newBannerUri ?: "${Constants.URL_GAMBAR_BASE}${viewModel.myCommunity?.banner_url ?: viewModel.myCommunity?.foto_url}"
-                            AsyncImage(
-                                model = ImageRequest.Builder(context).data(bannerModel).crossfade(true).build(),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
+                            AsyncImage(model = ImageRequest.Builder(context).data(bannerModel).crossfade(true).build(), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                         }
-                        Text("Banner", fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
-                OutlinedTextField(
-                    value = nama, onValueChange = { nama = it },
-                    label = { Text("Nama Komunitas") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                LabelText("Nama Komunitas")
+                OutlinedTextField(value = nama, onValueChange = { nama = it }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                LabelText("Kategori")
+                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = kategori,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Kategori Komunitas") },
+                        value = kategori, onValueChange = {}, readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors()
+                        shape = RoundedCornerShape(12.dp)
                     )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        Constants.COMMUNITY_CATEGORIES.forEach { selectionOption ->
-                            DropdownMenuItem(
-                                text = { Text(selectionOption) },
-                                onClick = {
-                                    kategori = selectionOption
-                                    expanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
+                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        Constants.COMMUNITY_CATEGORIES.forEach { option ->
+                            DropdownMenuItem(text = { Text(option) }, onClick = { kategori = option; expanded = false })
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
-                    value = lokasi, onValueChange = { lokasi = it },
-                    label = { Text("Lokasi") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                LabelText("Lokasi")
+                OutlinedTextField(value = lokasi, onValueChange = { lokasi = it }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
 
-                OutlinedTextField(
-                    value = deskripsi, onValueChange = { deskripsi = it },
-                    label = { Text("Deskripsi") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
-                    value = kontak, onValueChange = { kontak = it },
-                    label = { Text("Kontak") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                LabelText("Deskripsi")
+                OutlinedTextField(value = deskripsi, onValueChange = { deskripsi = it }, modifier = Modifier.fillMaxWidth(), minLines = 3, shape = RoundedCornerShape(12.dp))
 
-                OutlinedTextField(
-                    value = linkGrup, onValueChange = { linkGrup = it },
-                    label = { Text("Link Grup") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(40.dp))
+                LabelText("Kontak")
+                OutlinedTextField(value = kontak, onValueChange = { kontak = it }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LabelText("Link Grup WhatsApp")
+                OutlinedTextField(value = linkGrup, onValueChange = { linkGrup = it }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+
+                Spacer(modifier = Modifier.height(48.dp))
 
                 Button(
                     onClick = {
                         val logoFile = if (newLogoUri != null) uriToFile(newLogoUri!!, context) else null
                         val bannerFile = if (newBannerUri != null) uriToFile(newBannerUri!!, context) else null
-
-                        viewModel.updateCommunity(
-                            id = communityId,
-                            nama, lokasi, deskripsi, kategori, kontak, linkGrup,
-                            logoFile, bannerFile
-                        )
-
-                        Toast.makeText(context, "Perubahan Disimpan!", Toast.LENGTH_SHORT).show()
+                        viewModel.updateCommunity(communityId, nama, lokasi, deskripsi, kategori, kontak, linkGrup, logoFile, bannerFile)
+                        Toast.makeText(context, "Pembaruan Berhasil!", Toast.LENGTH_SHORT).show()
                         navController.popBackStack()
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
                     enabled = !viewModel.isLoading
                 ) {
-                    if (viewModel.isLoading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text("Simpan Perubahan", fontWeight = FontWeight.Bold)
-                    }
+                    if (viewModel.isLoading) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    else Text("Simpan Perubahan", fontWeight = FontWeight.Bold)
                 }
-
                 Spacer(modifier = Modifier.height(40.dp))
             }
         }

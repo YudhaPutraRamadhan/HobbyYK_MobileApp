@@ -1,8 +1,11 @@
 package com.example.hobbyyk_new.view.screen.auth
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -27,6 +30,7 @@ fun RequestAdminScreen(navController: NavController) {
 
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(viewModel.successMessage, viewModel.errorMessage) {
         viewModel.successMessage?.let {
@@ -41,13 +45,14 @@ fun RequestAdminScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Daftar Komunitas", fontWeight = FontWeight.Bold) },
+            TopAppBar(
+                title = { Text("Daftar Komunitas", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
@@ -55,60 +60,83 @@ fun RequestAdminScreen(navController: NavController) {
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "Ingin mendaftarkan komunitas Anda?",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                text = "Bangun Komunitasmu",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Masukkan data di bawah. Sistem kami akan membuatkan akun Admin secara otomatis dan mengirimkannya ke email Anda.",
-                fontSize = 16.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center
-            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Sistem akan membuatkan akun Admin otomatis dan mengirimkannya ke email Anda setelah permintaan disetujui.",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(16.dp),
+                    lineHeight = 20.sp
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Form Username
+            LabelText("Nama Komunitas / Username Admin")
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username Admin") },
+                placeholder = { Text("Masukkan nama untuk identitas admin") },
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Form Email
+            LabelText("Email Aktif")
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email Aktif") },
                 placeholder = { Text("contoh@email.com") },
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            // Tombol Submit
             Button(
                 onClick = { viewModel.submitRequest(username, email) },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
                 enabled = !viewModel.isLoading
             ) {
                 if (viewModel.isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Kirim Permintaan")
+                    Text("Kirim Permintaan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Proses peninjauan biasanya memakan waktu 1 menit hingga 5 menit",
+                fontSize = 12.sp,
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

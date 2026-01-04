@@ -49,191 +49,156 @@ fun CommunityDetailScreen(
 ) {
     val viewModel: CommunityDetailViewModel = viewModel()
     val context = LocalContext.current
-
     val userStore = remember { UserStore(context) }
     val userRole by userStore.userRole.collectAsState(initial = null)
 
-    LaunchedEffect(communityId) {
-        viewModel.getDetail(communityId)
-    }
+    LaunchedEffect(communityId) { viewModel.getDetail(communityId) }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Detail Komunitas") },
+            TopAppBar(
+                title = { Text("Detail", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 }
             )
         },
         bottomBar = {
             if (!isAdminPreview && viewModel.community != null && userRole == "user") {
-                BottomAppBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 8.dp
+                Surface(
+                    tonalElevation = 12.dp,
+                    shadowElevation = 12.dp,
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         OutlinedButton(
                             onClick = { viewModel.toggleLike(communityId) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(
-                                1.dp,
-                                if (viewModel.isLiked) Color.Red else MaterialTheme.colorScheme.outline
-                            )
+                            modifier = Modifier.weight(0.4f).height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, if (viewModel.isLiked) Color.Red else Color.LightGray)
                         ) {
                             Icon(
                                 imageVector = if (viewModel.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Like",
-                                tint = if (viewModel.isLiked) Color.Red else Color.Gray
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "${viewModel.likeCount} ${if (viewModel.isLiked) "Disukai" else "Suka"}",
-                                color = if (viewModel.isLiked) Color.Red else MaterialTheme.colorScheme.onSurface
+                                contentDescription = null,
+                                tint = if (viewModel.isLiked) Color.Red else Color.Gray,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
                         Button(
                             onClick = { viewModel.toggleJoin(communityId) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(0.6f).height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (viewModel.isJoined) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                containerColor = if (viewModel.isJoined) Color.Red else MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Text(text = if (viewModel.isJoined) "Keluar" else "Gabung")
+                            Text(if (viewModel.isJoined) "Keluar Komunitas" else "Gabung Sekarang", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
         }
     ) { paddingValues ->
-
         Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-
             if (viewModel.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (viewModel.community != null) {
                 val data = viewModel.community!!
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Box(modifier = Modifier.height(200.dp).fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                    Box(modifier = Modifier.height(240.dp).fillMaxWidth()) {
                         AsyncImage(
                             model = "${Constants.URL_GAMBAR_BASE}${data.banner_url ?: data.foto_url}",
-                            contentDescription = "Banner",
+                            contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.height(180.dp).fillMaxWidth()
+                        )
+                        AsyncImage(
+                            model = "${Constants.URL_GAMBAR_BASE}${data.foto_url}",
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(start = 24.dp)
+                                .size(90.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .padding(4.dp)
+                                .clip(CircleShape)
                         )
                     }
 
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            AsyncImage(
-                                model = "${Constants.URL_GAMBAR_BASE}${data.foto_url}",
-                                contentDescription = "Logo",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Transparent)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+                        Text(text = data.nama_komunitas, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
 
-                            Column {
-                                Text(
-                                    text = data.nama_komunitas,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-                                    Text(text = "${data.lokasi} • ", color = Color.Gray, fontSize = 12.sp)
-
-                                    Icon(Icons.Default.Group, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-                                    Text(text = " ${viewModel.memberCount} Anggota", color = Color.Gray, fontSize = 12.sp)
-
-                                    Text(text = " • ", color = Color.Gray, fontSize = 12.sp)
-
-                                    Icon(Icons.Default.Favorite, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
-                                    Text(text = " ${viewModel.likeCount} Suka", color = Color.Gray, fontSize = 12.sp)
-                                }
-
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                                    Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(text = data.kategori, color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                                }
-                            }
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                            BadgeItem(Icons.Default.LocationOn, data.lokasi)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            BadgeItem(Icons.Default.Group, "${viewModel.memberCount} Anggota")
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        Text(text = "Tentang Komunitas", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = data.deskripsi, lineHeight = 24.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Text("Tentang Komunitas", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(
+                            text = data.deskripsi,
+                            modifier = Modifier.padding(top = 8.dp),
+                            color = Color.DarkGray,
+                            lineHeight = 24.sp
+                        )
 
                         if (data.link_grup.isNotEmpty()) {
-                            OutlinedButton(
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Button(
                                 onClick = {
-                                    try {
-                                        val url = data.link_grup
-                                        if (url.startsWith("http://") || url.startsWith("https://")) {
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                                            context.startActivity(intent)
-                                        } else {
-                                            Toast.makeText(context, "Link tidak valid! Harus diawali http:// atau https://", Toast.LENGTH_SHORT).show()
-                                        }
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "Gagal membuka link: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    val url = data.link_grup
+                                    if (url.startsWith("http")) {
+                                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                                    } else {
+                                        Toast.makeText(context, "Link tidak valid", Toast.LENGTH_SHORT).show()
                                     }
                                 },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF25D366))
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))
                             ) {
-                                Text("Gabung Grup WhatsApp", fontWeight = FontWeight.Bold)
+                                Text("Grup WhatsApp Komunitas", fontWeight = FontWeight.Bold)
                             }
-                            Spacer(modifier = Modifier.height(24.dp))
                         }
 
-                        Text(text = "Kontak Person", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Text("Hubungi Admin", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp) // Padding bawah biar gak ketutup bottom bar
+                            modifier = Modifier.padding(top = 12.dp, bottom = 40.dp).fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                         ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(Icons.Default.Phone, contentDescription = "Telepon", tint = MaterialTheme.colorScheme.primary)
+                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Phone, null, tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column {
-                                    Text(text = "Nomor Admin", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                    Text(text = data.kontak, fontSize = 16.sp)
+                                    Text("WhatsApp / Telepon", fontSize = 12.sp, color = Color.Gray)
+                                    Text(data.kontak, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
                     }
                 }
-            } else {
-                Text("Gagal memuat data", modifier = Modifier.align(Alignment.Center))
             }
         }
+    }
+}
+
+@Composable
+fun BadgeItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(label, fontSize = 12.sp, color = Color.Gray)
     }
 }

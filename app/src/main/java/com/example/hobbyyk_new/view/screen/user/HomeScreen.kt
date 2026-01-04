@@ -1,8 +1,10 @@
 package com.example.hobbyyk_new.view.screen.user
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Event
@@ -12,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -25,27 +29,33 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val userStore = UserStore(context)
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("HobbyYK Dashboard", fontWeight = FontWeight.Bold) },
+            TopAppBar(
+                title = {
+                    Text("HobbyYK", fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
+                },
                 actions = {
-                    IconButton(onClick = {
-                        navController.navigate("profile")
-                    }) {
+                    Surface(
+                        onClick = { navController.navigate("profile") },
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Person,
-                            contentDescription = "Profil Saya"
+                            contentDescription = "Profil Saya",
+                            modifier = Modifier.padding(8.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -54,23 +64,37 @@ fun HomeScreen(navController: NavController) {
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(24.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Text("Mau lihat apa hari ini?", fontSize = 20.sp, modifier = Modifier.padding(bottom = 32.dp))
+            Text(
+                text = "Halo, Sobat Hobi!",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Mau lihat apa hari ini?",
+                fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 4.dp, bottom = 40.dp)
+            )
 
             MenuCard(
-                title = "Data Komunitas",
+                title = "Eksplor Komunitas",
+                subtitle = "Temukan teman sehobi di Jogja",
                 icon = Icons.Default.Groups,
+                color = MaterialTheme.colorScheme.primary,
                 onClick = { navController.navigate("community_list") }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             MenuCard(
                 title = "Aktivitas Terbaru",
+                subtitle = "Lihat Aktivitas seru Komunitas mu",
                 icon = Icons.Default.Event,
+                color = Color(0xFF2499DD),
                 onClick = { navController.navigate("activity_feed") }
             )
         }
@@ -78,22 +102,36 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun MenuCard(title: String, icon: ImageVector, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+fun MenuCard(title: String, subtitle: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = color.copy(alpha = 0.1f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.2f))
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text = title, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(color),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(28.dp))
+            }
+
+            Spacer(modifier = Modifier.width(20.dp))
+
+            Column {
+                Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                Text(text = subtitle, fontSize = 13.sp, color = Color.Gray)
+            }
         }
     }
 }

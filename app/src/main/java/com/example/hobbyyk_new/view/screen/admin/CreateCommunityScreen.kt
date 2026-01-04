@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.hobbyyk_new.utils.Constants
 import com.example.hobbyyk_new.utils.uriToFile
+import com.example.hobbyyk_new.view.screen.auth.LabelText
 import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +49,6 @@ fun CreateCommunityScreen(navController: NavController) {
 
     var logoUri by remember { mutableStateOf<Uri?>(null) }
     var bannerUri by remember { mutableStateOf<Uri?>(null) }
-
     var expanded by remember { mutableStateOf(false) }
 
     val logoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { logoUri = it }
@@ -70,8 +70,8 @@ fun CreateCommunityScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Buat Komunitas Baru") },
+            TopAppBar(
+                title = { Text("Registrasi Komunitas", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -87,72 +87,75 @@ fun CreateCommunityScreen(navController: NavController) {
                 .padding(horizontal = 24.dp)
                 .verticalScroll(scrollState)
         ) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text("Aset Visual", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = MaterialTheme.colorScheme.primary)
+            Text("Logo dan Banner adalah wajah komunitas Anda.", fontSize = 12.sp, color = Color.Gray)
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Identitas Visual", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(12.dp))
-
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .size(100.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.LightGray.copy(alpha = 0.3f))
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
                             .clickable { logoLauncher.launch("image/*") }
                     ) {
                         if (logoUri != null) {
                             AsyncImage(model = logoUri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                         } else {
-                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = Color.Gray)
+                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         }
                     }
-                    Text("Logo", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
+                    Text("Logo", fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 8.dp))
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(2f)
-                ) {
+                // Banner Upload Box
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(2f)) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .height(100.dp)
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.LightGray.copy(alpha = 0.3f))
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
                             .clickable { bannerLauncher.launch("image/*") }
                     ) {
                         if (bannerUri != null) {
                             AsyncImage(model = bannerUri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                         } else {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Default.Upload, contentDescription = null, tint = Color.Gray)
-                                Text("Upload Banner", fontSize = 10.sp, color = Color.Gray)
+                                Icon(Icons.Default.Upload, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Text("Pilih Banner", fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
-                    Text("Banner Utama", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
+                    Text("Banner Utama", fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 8.dp))
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider()
+            Spacer(modifier = Modifier.height(32.dp))
+            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Detail Informasi", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text("Detail Informasi", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = MaterialTheme.colorScheme.primary)
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LabelText("Nama Komunitas")
             OutlinedTextField(
                 value = nama, onValueChange = { nama = it },
-                label = { Text("Nama Komunitas") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = { Text("Contoh: Komunitas Fotografi Jogja") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
-            Spacer(modifier = Modifier.height(12.dp))
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LabelText("Kategori")
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded },
@@ -162,88 +165,87 @@ fun CreateCommunityScreen(navController: NavController) {
                     value = kategori,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Kategori Komunitas") },
+                    placeholder = { Text("Pilih kategori...") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors()
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
 
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
+                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     Constants.COMMUNITY_CATEGORIES.forEach { selectionOption ->
                         DropdownMenuItem(
                             text = { Text(selectionOption) },
-                            onClick = {
-                                kategori = selectionOption
-                                expanded = false
-                            },
+                            onClick = { kategori = selectionOption; expanded = false },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            LabelText("Lokasi")
             OutlinedTextField(
                 value = lokasi, onValueChange = { lokasi = it },
-                label = { Text("Lokasi (Kota/Daerah)") },
+                placeholder = { Text("Daerah/Kecamatan di Yogyakarta") },
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
-            Spacer(modifier = Modifier.height(12.dp))
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LabelText("Deskripsi")
             OutlinedTextField(
                 value = deskripsi, onValueChange = { deskripsi = it },
-                label = { Text("Deskripsi Singkat") },
+                placeholder = { Text("Jelaskan visi atau kegiatan komunitas Anda...") },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 3
+                minLines = 3,
+                shape = RoundedCornerShape(12.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Kontak & Link", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("Hubungan Masyarakat", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.height(16.dp))
 
+            LabelText("Kontak Admin")
             OutlinedTextField(
                 value = kontak, onValueChange = { kontak = it },
-                label = { Text("Kontak Admin (WA/Email)") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = { Text("Nomor WhatsApp Aktif") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
-            Spacer(modifier = Modifier.height(12.dp))
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LabelText("Link Grup WhatsApp (Opsional)")
             OutlinedTextField(
                 value = linkGrup, onValueChange = { linkGrup = it },
-                label = { Text("Link Grup WhatsApp") },
+                placeholder = { Text("https://chat.whatsapp.com/...") },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("https://...") }
+                shape = RoundedCornerShape(12.dp)
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             Button(
                 onClick = {
                     if (logoUri != null && bannerUri != null && nama.isNotEmpty()) {
                         val logoFile = uriToFile(logoUri!!, context)
                         val bannerFile = uriToFile(bannerUri!!, context)
-
-                        viewModel.createCommunity(
-                            nama, lokasi, deskripsi, kategori, kontak, linkGrup, logoFile, bannerFile
-                        )
+                        viewModel.createCommunity(nama, lokasi, deskripsi, kategori, kontak, linkGrup, logoFile, bannerFile)
                     } else {
-                        Toast.makeText(context, "Mohon lengkapi nama, logo, dan banner!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Nama, Logo, dan Banner wajib diisi!", Toast.LENGTH_SHORT).show()
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp),
                 enabled = !viewModel.isLoading
             ) {
                 if (viewModel.isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Buat Komunitas Sekarang")
+                    Text("Daftarkan Komunitas", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
