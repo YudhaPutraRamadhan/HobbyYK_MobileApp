@@ -118,7 +118,7 @@ fun ProfileScreen(navController: NavController) {
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape)
-                        .background(Color.LightGray)
+                        .background(Color.Transparent)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
