@@ -7,10 +7,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hobbyyk_new.data.api.RetrofitClient
+import com.example.hobbyyk_new.data.datastore.UserStore
 import com.example.hobbyyk_new.data.model.Community
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel (private val userStore: UserStore) : ViewModel() {
 
     var communities by mutableStateOf<List<Community>>(emptyList())
     var isLoading by mutableStateOf(false)
@@ -19,8 +22,40 @@ class HomeViewModel : ViewModel() {
     var searchQuery by mutableStateOf("")
     var selectedCategory by mutableStateOf("Semua")
 
+    var isFirstTime by mutableStateOf(false)
+        private set
+
     init {
+        observeFirstTimeStatus()
         fetchCommunities()
+    }
+
+    private fun observeFirstTimeStatus() {
+        viewModelScope.launch {
+            // Gunakan collectLatest agar jika ID berubah, dia akan mengulang observasi
+            userStore.userId.collectLatest { id ->
+                if (id != null) {
+                    // Begitu ID dapat, baru kita ambil status tutorialnya
+                    userStore.getFirstTimeStatus(id).collect { status ->
+                        isFirstTime = status
+                        Log.d("HomeViewModel", "Status tutorial untuk User $id: $status")
+                    }
+                } else {
+                    Log.d("HomeViewModel", "UserId masih null, menunggu...")
+                }
+            }
+        }
+    }
+
+    fun completeTutorial() {
+        viewModelScope.launch {
+            // Pastikan kita ambil ID terbaru sebelum menyimpan
+            val id = userStore.userId.first()
+            id?.let {
+                userStore.setFirstTimeFinished(it)
+                isFirstTime = false // Langsung matikan overlay secara manual agar responsif
+            }
+        }
     }
 
     fun fetchCommunities(

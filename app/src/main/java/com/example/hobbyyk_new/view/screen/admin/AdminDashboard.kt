@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,12 +33,17 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.hobbyyk_new.data.model.Community
 import com.example.hobbyyk_new.utils.Constants
+import com.example.hobbyyk_new.view.components.SpotlightOverlay
 import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminDashboard(navController: NavController) {
-    val viewModel: AdminCommunityViewModel = viewModel()
+fun AdminDashboard(navController: NavController, viewModel: AdminCommunityViewModel) {
+    var step by remember { mutableStateOf(1) }
+    var targetWorkstation by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var targetInspirasi by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var targetProfil by remember { mutableStateOf<LayoutCoordinates?>(null) }
+
     val categories = listOf("Semua") + Constants.COMMUNITY_CATEGORIES
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -72,155 +79,180 @@ fun AdminDashboard(navController: NavController) {
         )
     }
 
-    Scaffold(
-        containerColor = Color(0xFFFAFAFA),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Admin Dashboard",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 20.sp,
-                        letterSpacing = (-0.5).sp
-                    )
-                },
-                actions = {
-                    IconButton(
-                        onClick = { navController.navigate("profile") },
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .background(Color(0xFFFF6B35).copy(alpha = 0.1f), CircleShape)
-                            .size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profil",
-                            tint = Color(0xFFFF6B35),
-                            modifier = Modifier.size(20.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = Color(0xFFFAFAFA),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            "Admin Dashboard",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 20.sp,
+                            letterSpacing = (-0.5).sp
                         )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            item {
-                Text(
-                    text = "Kelola Komunitas",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFF1A1A1A)
-                )
-            }
-
-            item {
-                MyCommunityCard(
-                    community = viewModel.myCommunity,
-                    isLoading = viewModel.isLoading,
-                    onCreateClick = { navController.navigate("create_community") },
-                    onEditClick = { id -> navController.navigate("edit_community/$id") },
-                    onDetailClick = { id -> navController.navigate("admin_community_detail/$id") },
-                    onDeleteClick = { showDeleteDialog = true }
-                )
-            }
-
-            if (viewModel.myCommunity != null && !viewModel.isLoading) {
-                item {
-                    ActivityManagerCard(
-                        onClick = {
-                            navController.navigate("activity_list/${viewModel.myCommunity!!.id}")
-                        }
-                    )
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            item {
-                Text(
-                    "Inspirasi Komunitas",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFF1A1A1A)
-                )
-
-                OutlinedTextField(
-                    value = viewModel.searchQuery,
-                    onValueChange = { viewModel.searchQuery = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    placeholder = { Text("Cari referensi komunitas...", color = Color.Gray) },
-                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color(0xFFFF6B35)) },
-                    trailingIcon = {
-                        if (viewModel.searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { viewModel.searchQuery = "" }) {
-                                Icon(Icons.Default.Close, null, tint = Color.Gray)
-                            }
-                        }
                     },
-                    shape = RoundedCornerShape(20.dp),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFFF6B35),
-                        unfocusedBorderColor = Color(0xFFEEEEEE),
-                        cursorColor = Color(0xFFFF6B35)
-                    )
-                )
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(categories) { category ->
-                        val isSelected = viewModel.selectedCategory == category
-                        Surface(
-                            onClick = { viewModel.selectedCategory = category },
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) Color(0xFFFF6B35) else Color.White,
-                            border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+                    actions = {
+                        IconButton(
+                            onClick = { navController.navigate("profile") },
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .onGloballyPositioned { targetProfil = it }
+                                .background(Color(0xFFFF6B35).copy(alpha = 0.1f), CircleShape)
+                                .size(40.dp)
                         ) {
-                            Text(
-                                category,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isSelected) Color.White else Color.Gray,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Profil",
+                                tint = Color(0xFFFF6B35),
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                    }
-                }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.White
+                    )
+                )
             }
-
-            if (viewModel.otherCommunities.isEmpty() && !viewModel.isLoading) {
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Text("Belum ada komunitas lain.", color = Color.LightGray, fontWeight = FontWeight.Medium)
-                    }
-                }
-            } else {
-                items(viewModel.otherCommunities) { community ->
-                    AdminExploreCommunityItem(
-                        community = community,
-                        onClick = { navController.navigate("community_detail/${community.id}") }
+                    Text(
+                        text = "Kelola Komunitas",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF1A1A1A)
                     )
                 }
+
+                item {
+                    Box(modifier = Modifier.onGloballyPositioned { targetWorkstation = it }) {
+                        MyCommunityCard(
+                            community = viewModel.myCommunity,
+                            isLoading = viewModel.isLoading,
+                            onCreateClick = { navController.navigate("create_community") },
+                            onEditClick = { id -> navController.navigate("edit_community/$id") },
+                            onDetailClick = { id -> navController.navigate("admin_community_detail/$id") },
+                            onDeleteClick = { showDeleteDialog = true }
+                        )
+                    }
+                }
+
+                if (viewModel.myCommunity != null && !viewModel.isLoading) {
+                    item {
+                        ActivityManagerCard(
+                            onClick = {
+                                navController.navigate("activity_list/${viewModel.myCommunity!!.id}")
+                            }
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                item {
+                    Column(modifier = Modifier.onGloballyPositioned { targetInspirasi = it }) {
+                        Text(
+                            "Inspirasi Komunitas",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF1A1A1A)
+                        )
+
+                        OutlinedTextField(
+                            value = viewModel.searchQuery,
+                            onValueChange = { viewModel.searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            placeholder = { Text("Cari referensi komunitas...", color = Color.Gray) },
+                            leadingIcon = { Icon(Icons.Default.Search, null, tint = Color(0xFFFF6B35)) },
+                            trailingIcon = {
+                                if (viewModel.searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.searchQuery = "" }) {
+                                        Icon(Icons.Default.Close, null, tint = Color.Gray)
+                                    }
+                                }
+                            },
+                            shape = RoundedCornerShape(20.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFFF6B35),
+                                unfocusedBorderColor = Color(0xFFEEEEEE),
+                                cursorColor = Color(0xFFFF6B35)
+                            )
+                        )
+
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(categories) { category ->
+                                val isSelected = viewModel.selectedCategory == category
+                                Surface(
+                                    onClick = { viewModel.selectedCategory = category },
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = if (isSelected) Color(0xFFFF6B35) else Color.White,
+                                    border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+                                ) {
+                                    Text(
+                                        category,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) Color.White else Color.Gray,
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (viewModel.otherCommunities.isEmpty() && !viewModel.isLoading) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                            Text("Belum ada komunitas lain.", color = Color.LightGray, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                } else {
+                    items(viewModel.otherCommunities) { community ->
+                        AdminExploreCommunityItem(
+                            community = community,
+                            onClick = { navController.navigate("community_detail/${community.id}") }
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+            }
+        }
+
+        if (viewModel.isFirstTime) {
+            val (currentCoords, text, isLast) = when (step) {
+                1 -> Triple(targetWorkstation, "Ini adalah ruang kerjamu. Kelola komunitas dan buat aktivitas baru untuk anggota di sini.", false)
+                2 -> Triple(targetInspirasi, "Kamu juga tetap bisa melihat komunitas lain untuk referensi atau mencari komunitas teman.", false)
+                else -> Triple(targetProfil, "Pengaturan akun admin kamu bisa diakses di sini.", true)
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
+            SpotlightOverlay(
+                targetCoordinates = currentCoords,
+                text = text,
+                onNext = {
+                    if (isLast) viewModel.completeTutorial() else step++
+                },
+                onSkip = { viewModel.completeTutorial() },
+                isLastStep = isLast
+            )
         }
     }
 }

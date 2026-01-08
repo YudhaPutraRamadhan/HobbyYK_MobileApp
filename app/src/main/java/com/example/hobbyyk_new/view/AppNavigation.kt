@@ -33,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,15 +66,19 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigation
+import com.example.hobbyyk_new.data.datastore.UserStore
 import com.example.hobbyyk_new.data.datastore.dataStore
 import com.example.hobbyyk_new.utils.SessionManager
 import com.example.hobbyyk_new.view.screen.auth.RequestAdminScreen
+import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
+import com.example.hobbyyk_new.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavigation(navController: NavHostController = rememberNavController()) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val userStore = remember { UserStore(context) }
 
     val isSessionExpired by SessionManager.isSessionExpired.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -104,9 +111,8 @@ fun AppNavigation(navController: NavHostController = rememberNavController()) {
     ) {
         authGraph(navController)
 
-        userGraph(navController)
-
-        adminGraph(navController)
+        userGraph(navController, userStore)
+        adminGraph(navController, userStore)
 
         superAdminGraph(navController)
     }
@@ -127,9 +133,17 @@ fun NavGraphBuilder.authGraph(navController: NavController) {
     }
 }
 
-fun NavGraphBuilder.userGraph(navController: NavController) {
+fun NavGraphBuilder.userGraph(navController: NavController, userStore: UserStore) {
     navigation(startDestination = "home", route = "user_graph") {
-        composable("home") { HomeScreen(navController) }
+        composable("home") {
+            val factory = object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return HomeViewModel(userStore) as T
+                }
+            }
+            val viewModel: HomeViewModel = viewModel(factory = factory)
+            HomeScreen(navController, viewModel)
+        }
         composable("community_list") { CommunityListScreen(navController) }
         composable("activity_feed") { ActivityFeedScreen(navController) }
         composable("profile") { ProfileScreen(navController) }
@@ -163,9 +177,17 @@ fun NavGraphBuilder.userGraph(navController: NavController) {
     }
 }
 
-fun NavGraphBuilder.adminGraph(navController: NavController) {
+fun NavGraphBuilder.adminGraph(navController: NavController, userStore: UserStore) {
     navigation(startDestination = "admin_dashboard", route = "admin_graph") {
-        composable("admin_dashboard") { AdminDashboard(navController) }
+        composable("admin_dashboard") {
+            val factory = object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AdminCommunityViewModel(userStore) as T
+                }
+            }
+            val viewModel: AdminCommunityViewModel = viewModel(factory = factory)
+            AdminDashboard(navController, viewModel)
+        }
         composable("create_community") { CreateCommunityScreen(navController) }
 
         composable(

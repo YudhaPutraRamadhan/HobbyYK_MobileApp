@@ -21,6 +21,7 @@ class UserStore(private val context: Context) {
 
         val ROLE_KEY = stringPreferencesKey("user_role")
         val USER_ID_KEY = intPreferencesKey("user_id")
+        private fun firstTimeKeyForUser(userId: Int) = booleanPreferencesKey("is_first_time_$userId")
     }
 
     val authToken: Flow<String?> = context.dataStore.data.map { preferences ->
@@ -33,6 +34,13 @@ class UserStore(private val context: Context) {
 
     val userId: Flow<Int?> = context.dataStore.data.map { preferences ->
         preferences[USER_ID_KEY]
+    }
+
+    fun getFirstTimeStatus(userId: Int): Flow<Boolean> {
+        return context.dataStore.data.map { preferences ->
+            // Ambil key spesifik user, jika tidak ada default-nya true (tampilkan tutor)
+            preferences[firstTimeKeyForUser(userId)] ?: true
+        }
     }
 
     val isFirstTime: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -50,6 +58,12 @@ class UserStore(private val context: Context) {
             preferences[TOKEN_KEY] = token
             preferences[ROLE_KEY] = role
             preferences[USER_ID_KEY] = id
+        }
+    }
+
+    suspend fun setFirstTimeFinished(userId: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[firstTimeKeyForUser(userId)] = false
         }
     }
 

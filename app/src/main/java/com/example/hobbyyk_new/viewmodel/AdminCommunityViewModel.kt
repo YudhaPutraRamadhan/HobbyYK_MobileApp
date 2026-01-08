@@ -6,7 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hobbyyk_new.data.api.RetrofitClient
+import com.example.hobbyyk_new.data.datastore.UserStore
 import com.example.hobbyyk_new.data.model.Community
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -14,7 +16,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
-class AdminCommunityViewModel : ViewModel() {
+class AdminCommunityViewModel (private val userStore: UserStore) : ViewModel() {
     var myCommunity by mutableStateOf<Community?>(null)
 
     var otherCommunities by mutableStateOf<List<Community>>(emptyList())
@@ -23,6 +25,33 @@ class AdminCommunityViewModel : ViewModel() {
 
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
+
+    var isFirstTime by mutableStateOf(false)
+        private set
+
+    init {
+        observeFirstTimeStatus()
+    }
+    private fun observeFirstTimeStatus() {
+        viewModelScope.launch {
+            userStore.userId.collect { id ->
+                id?.let { currentId ->
+                    userStore.getFirstTimeStatus(currentId).collect { status ->
+                        isFirstTime = status
+                    }
+                }
+            }
+        }
+    }
+
+    fun completeTutorial() {
+        viewModelScope.launch {
+            val id = userStore.userId.first()
+            id?.let {
+                userStore.setFirstTimeFinished(it)
+            }
+        }
+    }
 
     fun fetchMyCommunity() {
         viewModelScope.launch {
