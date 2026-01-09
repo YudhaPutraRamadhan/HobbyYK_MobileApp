@@ -56,6 +56,13 @@ fun CommunityDetailScreen(
 
     LaunchedEffect(communityId) { viewModel.getDetail(communityId) }
 
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.message = null // Reset agar tidak muncul berulang
+        }
+    }
+
     Scaffold(
         containerColor = Color.White,
         topBar = {
@@ -80,28 +87,46 @@ fun CommunityDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Like Button (Colorful)
                         Surface(
-                            onClick = { viewModel.toggleLike(communityId) },
+                            onClick = {
+                                if (!viewModel.isLoading) viewModel.toggleLike(communityId)
+                            },
                             shape = RoundedCornerShape(16.dp),
                             color = if (viewModel.isLiked) Color(0xFFFFEBEE) else Color(0xFFF5F5F5),
-                            modifier = Modifier.size(56.dp)
+                            modifier = Modifier
+                                .height(56.dp)
+                                .wrapContentWidth()
+                                .padding(end = 4.dp)
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
                                 Icon(
                                     imageVector = if (viewModel.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                     contentDescription = null,
                                     tint = if (viewModel.isLiked) Color(0xFFE53935) else Color.Gray,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(22.dp)
                                 )
+
+                                if (viewModel.isLiked) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "${viewModel.likeCount}",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFFE53935)
+                                    )
+                                }
                             }
                         }
 
-                        // Join Button (Modern Bold)
                         Button(
                             onClick = { viewModel.toggleJoin(communityId) },
                             modifier = Modifier.weight(1f).height(56.dp),
                             shape = RoundedCornerShape(16.dp),
+                            enabled = !viewModel.isLoading,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (viewModel.isJoined) Color(0xFFE53935) else Color(0xFFFF6B35)
                             ),
@@ -119,13 +144,12 @@ fun CommunityDetailScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-            if (viewModel.isLoading) {
+            if (viewModel.isLoading && viewModel.community == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color(0xFFFF6B35))
             } else if (viewModel.community != null) {
                 val data = viewModel.community!!
                 Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
 
-                    // Header Image Section
                     Box(modifier = Modifier.height(260.dp).fillMaxWidth()) {
                         AsyncImage(
                             model = "${Constants.URL_GAMBAR_BASE}${data.banner_url ?: data.foto_url}",
@@ -133,12 +157,10 @@ fun CommunityDetailScreen(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.height(200.dp).fillMaxWidth()
                         )
-                        // Gradient Overlay for visibility
                         Box(modifier = Modifier.height(200.dp).fillMaxWidth().background(
                             Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f)))
                         ))
 
-                        // Overlapping Profile Picture
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
@@ -172,6 +194,9 @@ fun CommunityDetailScreen(
                             BadgeItem(Icons.Default.LocationOn, data.lokasi, Color(0xFFFF6B35))
                             Spacer(modifier = Modifier.width(16.dp))
                             BadgeItem(Icons.Default.Group, "${viewModel.memberCount} Anggota", Color(0xFF4361EE))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            BadgeItem(icon = Icons.Default.Favorite, label = "${viewModel.likeCount} Suka", color = Color(0xFFE53935)
+                            )
                         }
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = Color(0xFFF5F5F5))
