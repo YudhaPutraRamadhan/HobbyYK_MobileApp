@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -31,14 +32,17 @@ import com.example.hobbyyk_new.viewmodel.ProfileViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerifyChangePassScreen(navController: NavController) {
-    val viewModel: ProfileViewModel = viewModel()
     val context = LocalContext.current
+    val viewModel: ProfileViewModel = viewModel(
+        viewModelStoreOwner = context as androidx.lifecycle.ViewModelStoreOwner
+    )
 
     var otp by remember { mutableStateOf("") }
     var newPass by remember { mutableStateOf("") }
     var confPass by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val isFormValid = otp.length == 6 && newPass.length >= 8 && confPass == newPass
 
     LaunchedEffect(viewModel.message) {
         viewModel.message?.let {
@@ -115,7 +119,10 @@ fun VerifyChangePassScreen(navController: NavController) {
                         tint = Color(0xFFFF6B35)
                     )
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 textStyle = LocalTextStyle.current.copy(letterSpacing = 4.sp),
@@ -139,7 +146,7 @@ fun VerifyChangePassScreen(navController: NavController) {
             OutlinedTextField(
                 value = newPass,
                 onValueChange = { newPass = it },
-                placeholder = { Text("Masukkan password baru") },
+                placeholder = { Text("Minimal 8 karakter") },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Lock,
@@ -147,6 +154,10 @@ fun VerifyChangePassScreen(navController: NavController) {
                         tint = Color(0xFFFF6B35)
                     )
                 },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -187,6 +198,10 @@ fun VerifyChangePassScreen(navController: NavController) {
                         tint = Color(0xFFFF6B35)
                     )
                 },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -200,7 +215,6 @@ fun VerifyChangePassScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Submit Button
             Button(
                 onClick = {
                     viewModel.verifyChangePass(otp, newPass, confPass) {
@@ -211,7 +225,7 @@ fun VerifyChangePassScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                enabled = otp.isNotEmpty() && newPass.isNotEmpty() && !viewModel.isLoading,
+                enabled = isFormValid && !viewModel.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFFF6B35),
                     disabledContainerColor = Color(0xFFFF6B35).copy(alpha = 0.6f)

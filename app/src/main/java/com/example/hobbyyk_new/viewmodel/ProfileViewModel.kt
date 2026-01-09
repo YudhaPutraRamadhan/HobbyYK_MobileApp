@@ -94,16 +94,20 @@ class ProfileViewModel : ViewModel() {
             isLoading = true
             try {
                 val request = com.example.hobbyyk_new.data.model.ChangePasswordRequest(otp, newPass, confPass)
-
                 val res = RetrofitClient.instance.verifyChangePass(request)
+
                 if (res.isSuccessful) {
                     message = "Password Sukses Diubah!"
                     onSuccess()
                 } else {
-                    message = "Gagal: ${res.body()?.msg ?: "Cek OTP/Password"}"
+                    val errorMsg = res.errorBody()?.string()
+                    message = "Gagal: OTP salah atau syarat password tidak terpenuhi"
                 }
-            } catch (e: Exception) { message = "Error: ${e.message}" }
-            finally { isLoading = false }
+            } catch (e: Exception) {
+                message = "Error: ${e.message}"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -112,16 +116,19 @@ class ProfileViewModel : ViewModel() {
             isLoading = true
             try {
                 val request = com.example.hobbyyk_new.data.model.EmailRequest(newEmail)
-
                 val res = RetrofitClient.instance.reqChangeEmailOtp(request)
+
                 if (res.isSuccessful) {
                     message = "OTP dikirim ke $newEmail"
                     navigateToVerifyEmail = newEmail
                 } else {
-                    message = "Gagal: ${res.errorBody()?.string() ?: res.message()}"
+                    message = "Gagal: Email sudah terdaftar atau format salah"
                 }
-            } catch (e: Exception) { message = "Error: ${e.message}" }
-            finally { isLoading = false }
+            } catch (e: Exception) {
+                message = "Error: ${e.message}"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -130,17 +137,20 @@ class ProfileViewModel : ViewModel() {
             isLoading = true
             try {
                 val request = com.example.hobbyyk_new.data.model.VerifyEmailRequest(otp, newEmail)
-
                 val res = RetrofitClient.instance.verifyChangeEmail(request)
+
                 if (res.isSuccessful) {
                     message = "Email Sukses Diubah!"
                     onSuccess()
                     fetchProfile()
                 } else {
-                    message = "Gagal: ${res.body()?.msg ?: "Cek OTP"}"
+                    message = "Gagal: OTP salah atau email sudah digunakan"
                 }
-            } catch (e: Exception) { message = "Error: ${e.message}" }
-            finally { isLoading = false }
+            } catch (e: Exception) {
+                message = "Error: ${e.message}"
+            } finally {
+                isLoading = false
+            }
         }
     }
 

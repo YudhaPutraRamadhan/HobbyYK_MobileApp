@@ -5,7 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.hobbyyk_new.data.api.RetrofitClient
 import com.example.hobbyyk_new.data.datastore.UserStore
 import com.example.hobbyyk_new.data.model.Community
@@ -28,6 +31,16 @@ class HomeViewModel (private val userStore: UserStore) : ViewModel() {
     init {
         observeFirstTimeStatus()
         fetchCommunities()
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val context = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as android.app.Application)
+                val userStore = UserStore(context)
+                HomeViewModel(userStore = userStore)
+            }
+        }
     }
 
     private fun observeFirstTimeStatus() {

@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -27,8 +28,11 @@ import com.example.hobbyyk_new.viewmodel.ProfileViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerifyChangeEmailScreen(navController: NavController, newEmail: String) {
-    val viewModel: ProfileViewModel = viewModel()
     val context = LocalContext.current
+    val viewModel: ProfileViewModel = viewModel(
+        viewModelStoreOwner = context as androidx.lifecycle.ViewModelStoreOwner
+    )
+
     var otp by remember { mutableStateOf("") }
 
     LaunchedEffect(viewModel.message) {
@@ -108,7 +112,10 @@ fun VerifyChangeEmailScreen(navController: NavController, newEmail: String) {
                 onValueChange = { if(it.length <= 6) otp = it },
                 label = { Text("Kode OTP") },
                 placeholder = { Text("Masukkan 6 digit kode") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 textStyle = LocalTextStyle.current.copy(
@@ -139,7 +146,7 @@ fun VerifyChangeEmailScreen(navController: NavController, newEmail: String) {
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                enabled = otp.length >= 4 && !viewModel.isLoading,
+                enabled = otp.length == 6 && !viewModel.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFFF6B35),
                     disabledContainerColor = Color(0xFFFF6B35).copy(alpha = 0.6f)

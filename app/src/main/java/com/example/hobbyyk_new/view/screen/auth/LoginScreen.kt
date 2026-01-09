@@ -60,7 +60,6 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Header with colorful accent
             Text(
                 text = "Selamat Datang!",
                 fontSize = 32.sp,
@@ -79,11 +78,19 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Email Field with icon
             OutlinedTextField(
                 value = viewModel.email,
-                onValueChange = { viewModel.email = it },
+                onValueChange = {
+                    viewModel.email = it
+                    if (viewModel.emailError != null) viewModel.emailError = null
+                },
                 label = { Text("Email") },
+                isError = viewModel.emailError != null,
+                supportingText = {
+                    if (viewModel.emailError != null) {
+                        Text(text = viewModel.emailError!!, color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Email,
@@ -97,17 +104,26 @@ fun LoginScreen(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
                     focusedLabelColor = Color(0xFFFF6B35),
-                    cursorColor = Color(0xFFFF6B35)
+                    cursorColor = Color(0xFFFF6B35),
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Password Field with icon
             OutlinedTextField(
                 value = viewModel.password,
-                onValueChange = { viewModel.password = it },
+                onValueChange = {
+                    viewModel.password = it
+                    if (viewModel.passwordError != null) viewModel.passwordError = null
+                },
                 label = { Text("Password") },
+                isError = viewModel.passwordError != null,
+                supportingText = {
+                    if (viewModel.passwordError != null) {
+                        Text(text = viewModel.passwordError!!, color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Lock,
@@ -128,11 +144,11 @@ fun LoginScreen(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
                     focusedLabelColor = Color(0xFFFF6B35),
-                    cursorColor = Color(0xFFFF6B35)
+                    cursorColor = Color(0xFFFF6B35),
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
-            // Error Message
             if (viewModel.errorMessage != null) {
                 Text(
                     text = viewModel.errorMessage!!,

@@ -105,21 +105,16 @@ fun RequestAdminScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            LabelText("Nama Komunitas / Username Admin")
+            LabelText("Username Admin")
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
                 placeholder = { Text("Masukkan nama untuk identitas admin") },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        tint = Color(0xFFFF6B35)
-                    )
-                },
+                leadingIcon = { Icon(Icons.Default.Person, null, tint = Color(0xFFFF6B35)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
+                isError = viewModel.usernameError != null,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
@@ -128,24 +123,22 @@ fun RequestAdminScreen(navController: NavController) {
                 )
             )
 
+            viewModel.usernameError?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Email Field
             LabelText("Email Aktif")
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 placeholder = { Text("contoh@email.com") },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Email,
-                        contentDescription = null,
-                        tint = Color(0xFFFF6B35)
-                    )
-                },
+                leadingIcon = { Icon(Icons.Default.Email, null, tint = Color(0xFFFF6B35)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
+                isError = viewModel.emailError != null,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
@@ -154,9 +147,12 @@ fun RequestAdminScreen(navController: NavController) {
                 )
             )
 
+            viewModel.emailError?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+            }
+
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Submit Button
             Button(
                 onClick = { viewModel.submitRequest(username, email) },
                 modifier = Modifier

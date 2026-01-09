@@ -24,11 +24,43 @@ class RegisterViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
     var isSuccess by mutableStateOf(false)
 
+    var emailError by mutableStateOf<String?>(null)
+    var passwordError by mutableStateOf<String?>(null)
+    var nameError by mutableStateOf<String?>(null)
+    var confPasswordError by mutableStateOf<String?>(null)
+
+
+
     fun register() {
-        if (password != confPassword) {
-            errorMessage = "Password dan Confirm Password tidak sama!"
-            return
+        emailError = null
+        passwordError = null
+        confPasswordError = null
+        nameError = null
+        errorMessage = null
+
+        var isValid = true
+
+        if (name.isBlank()) {
+            nameError = "Nama tidak boleh kosong"
+            isValid = false
         }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailError = "Format email salah"
+            isValid = false
+        }
+
+        if (password.length < 8) {
+            passwordError = "Password minimal 8 karakter"
+            isValid = false
+        }
+
+        if (confPassword != password) {
+            confPasswordError = "Konfirmasi password tidak cocok"
+            isValid = false
+        }
+
+        if (!isValid) return
 
         viewModelScope.launch {
             isLoading = true
@@ -46,11 +78,22 @@ class RegisterViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     navigateToOtp = email
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    errorMessage = "Gagal Daftar: $errorBody"
+                    val errorMsg = response.errorBody()?.string() ?: ""
+
+                    when {
+                        errorMsg.contains("Email", ignoreCase = true) -> {
+                            emailError = "Email ini sudah terdaftar, gunakan email lain."
+                        }
+                        errorMsg.contains("Username", ignoreCase = true) -> {
+                            nameError = "Username sudah dipakai, cari nama yang lebih unik ya!"
+                        }
+                        else -> {
+                            errorMessage = "Gagal: $errorMsg"
+                        }
+                    }
                 }
             } catch (e: Exception) {
-                errorMessage = "Error: ${e.message}"
+                errorMessage = "Koneksi bermasalah: ${e.message}"
             } finally {
                 isLoading = false
             }

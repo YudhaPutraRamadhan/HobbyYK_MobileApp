@@ -81,7 +81,6 @@ fun RegisterScreen(navController: NavController) {
                 .padding(bottom = 24.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            // Header Section
             Text(
                 text = "Ayo Bergabung!",
                 fontSize = 32.sp,
@@ -96,66 +95,72 @@ fun RegisterScreen(navController: NavController) {
                 modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
             )
 
-            // Username Field
             LabelText("Username")
             OutlinedTextField(
                 value = viewModel.name,
-                onValueChange = { viewModel.name = it },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        tint = Color(0xFFFF6B35)
-                    )
+                onValueChange = {
+                    viewModel.name = it
+                    if (viewModel.nameError != null) viewModel.nameError = null
                 },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFFFF6B35)) },
+                isError = viewModel.nameError != null,
+                supportingText = {
+                    if (viewModel.nameError != null) {
+                        Text(text = viewModel.nameError!!, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                placeholder = { Text("Masukkan username") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedLabelColor = Color(0xFFFF6B35),
-                    cursorColor = Color(0xFFFF6B35)
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Email Field
             LabelText("Email")
             OutlinedTextField(
                 value = viewModel.email,
-                onValueChange = { viewModel.email = it },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Email,
-                        contentDescription = null,
-                        tint = Color(0xFFFF6B35)
-                    )
+                onValueChange = {
+                    viewModel.email = it
+                    if (viewModel.emailError != null) viewModel.emailError = null
                 },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color(0xFFFF6B35)) },
+                isError = viewModel.emailError != null,
+                supportingText = {
+                    if (viewModel.emailError != null) {
+                        Text(text = viewModel.emailError!!, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                placeholder = { Text("contoh@mail.com") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedLabelColor = Color(0xFFFF6B35),
-                    cursorColor = Color(0xFFFF6B35)
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Password Field
             LabelText("Password")
             OutlinedTextField(
                 value = viewModel.password,
-                onValueChange = { viewModel.password = it },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = null,
-                        tint = Color(0xFFFF6B35)
-                    )
+                onValueChange = {
+                    viewModel.password = it
+                    if (viewModel.passwordError != null) viewModel.passwordError = null
+                },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFF6B35)) },
+                isError = viewModel.passwordError != null,
+                supportingText = {
+                    if (viewModel.passwordError != null) {
+                        Text(text = viewModel.passwordError!!, color = MaterialTheme.colorScheme.error)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -163,49 +168,44 @@ fun RegisterScreen(navController: NavController) {
                 trailingIcon = {
                     val image = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                     IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                        Icon(
-                            imageVector = image,
-                            contentDescription = "Toggle",
-                            tint = Color.Gray
-                        )
+                        Icon(imageVector = image, contentDescription = "Toggle Password", tint = Color.Gray)
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedLabelColor = Color(0xFFFF6B35),
-                    cursorColor = Color(0xFFFF6B35)
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Confirm Password Field
             LabelText("Konfirmasi Password")
             OutlinedTextField(
                 value = viewModel.confPassword,
-                onValueChange = { viewModel.confPassword = it },
+                onValueChange = {
+                    viewModel.confPassword = it
+                    if (viewModel.confPasswordError != null) viewModel.confPasswordError = null
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = null,
-                        tint = Color(0xFFFF6B35)
-                    )
+                isError = viewModel.confPasswordError != null,
+                supportingText = {
+                    if (viewModel.confPasswordError != null) {
+                        Text(text = viewModel.confPasswordError!!, color = MaterialTheme.colorScheme.error)
+                    }
                 },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFF6B35)) },
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedLabelColor = Color(0xFFFF6B35),
-                    cursorColor = Color(0xFFFF6B35)
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Register Button
             Button(
                 onClick = { viewModel.register() },
                 modifier = Modifier
