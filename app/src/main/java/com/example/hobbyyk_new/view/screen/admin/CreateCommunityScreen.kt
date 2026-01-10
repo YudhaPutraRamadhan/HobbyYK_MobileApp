@@ -44,6 +44,7 @@ import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
 fun CreateCommunityScreen(navController: NavController) {
     val context = LocalContext.current
     val userStore = remember { UserStore(context) }
+    val alphaSpaceRegex = Regex("^[a-zA-Z\\s]*$")
     val factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return AdminCommunityViewModel(userStore) as T
@@ -160,15 +161,18 @@ fun CreateCommunityScreen(navController: NavController) {
             LabelText("Nama Komunitas")
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = nama, onValueChange = { nama = it },
+                value = nama, onValueChange = { if (it.isEmpty() || it.matches(alphaSpaceRegex)) {
+                    nama = it
+                } },
                 placeholder = { Text("Contoh: Komunitas Fotografi Jogja", color = Color.LightGray) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
-                    unfocusedBorderColor = Color(0xFFEEEEEE),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
+                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                    focusedLabelColor = Color(0xFFFF6B35),
+                    cursorColor = Color(0xFFFF6B35),
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
@@ -191,7 +195,10 @@ fun CreateCommunityScreen(navController: NavController) {
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFFFF6B35),
-                        unfocusedBorderColor = Color(0xFFEEEEEE)
+                        unfocusedBorderColor = Color(0xFFE0E0E0),
+                        focusedLabelColor = Color(0xFFFF6B35),
+                        cursorColor = Color(0xFFFF6B35),
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     )
                 )
 
@@ -215,14 +222,19 @@ fun CreateCommunityScreen(navController: NavController) {
             LabelText("Lokasi")
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = lokasi, onValueChange = { lokasi = it },
+                value = lokasi, onValueChange = { if (it.isEmpty() || it.matches(alphaSpaceRegex)) {
+                    lokasi = it
+                } },
                 placeholder = { Text("Daerah/Kecamatan di Yogyakarta", color = Color.LightGray) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
-                    unfocusedBorderColor = Color(0xFFEEEEEE)
+                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                    focusedLabelColor = Color(0xFFFF6B35),
+                    cursorColor = Color(0xFFFF6B35),
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
@@ -232,13 +244,16 @@ fun CreateCommunityScreen(navController: NavController) {
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = deskripsi, onValueChange = { deskripsi = it },
-                placeholder = { Text("Jelaskan visi atau kegiatan komunitas Anda...") },
+                placeholder = { Text("Jelaskan visi atau kegiatan komunitas Anda...", color = Color.LightGray) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 4,
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
-                    unfocusedBorderColor = Color(0xFFEEEEEE)
+                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                    focusedLabelColor = Color(0xFFFF6B35),
+                    cursorColor = Color(0xFFFF6B35),
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
@@ -250,12 +265,15 @@ fun CreateCommunityScreen(navController: NavController) {
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = kontak, onValueChange = { kontak = it },
-                placeholder = { Text("Nomor WhatsApp Aktif") },
+                placeholder = { Text("Nomor WhatsApp Aktif", color = Color.LightGray) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
-                    unfocusedBorderColor = Color(0xFFEEEEEE)
+                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                    focusedLabelColor = Color(0xFFFF6B35),
+                    cursorColor = Color(0xFFFF6B35),
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 
@@ -265,12 +283,15 @@ fun CreateCommunityScreen(navController: NavController) {
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = linkGrup, onValueChange = { linkGrup = it },
-                placeholder = { Text("https://chat.whatsapp.com/...") },
+                placeholder = { Text("https://chat.whatsapp.com/...", color = Color.LightGray) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFF6B35),
-                    unfocusedBorderColor = Color(0xFFEEEEEE)
+                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                    focusedLabelColor = Color(0xFFFF6B35),
+                    cursorColor = Color(0xFFFF6B35),
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 )
             )
 

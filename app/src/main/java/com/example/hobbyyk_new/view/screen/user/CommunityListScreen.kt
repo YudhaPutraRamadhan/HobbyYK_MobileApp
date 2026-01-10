@@ -39,7 +39,7 @@ import com.example.hobbyyk_new.viewmodel.HomeViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommunityListScreen(navController: NavController) {
-    val viewModel: HomeViewModel = viewModel()
+    val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
     val categories = listOf("Semua") + Constants.COMMUNITY_CATEGORIES
 
     LaunchedEffect(viewModel.searchQuery, viewModel.selectedCategory) {

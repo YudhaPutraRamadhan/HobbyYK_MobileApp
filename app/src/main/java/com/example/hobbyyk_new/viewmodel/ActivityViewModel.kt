@@ -16,7 +16,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
+import org.json.JSONObject
 
 class ActivityViewModel : ViewModel() {
     var activityList by mutableStateOf<List<Activity>>(emptyList())
@@ -70,6 +70,12 @@ class ActivityViewModel : ViewModel() {
         imageUris: List<Uri>,
         context: Context
     ) {
+        val alphaSpaceRegex = Regex("^[a-zA-Z\\s]*$")
+        if (!judul.matches(alphaSpaceRegex) || !lokasi.matches(alphaSpaceRegex)) {
+            errorMessage = "Judul dan Lokasi hanya boleh berisi huruf!"
+            return
+        }
+
         viewModelScope.launch {
             isLoading = true
             try {
@@ -81,13 +87,10 @@ class ActivityViewModel : ViewModel() {
                 val commIdPart = communityId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
                 val imageParts = mutableListOf<MultipartBody.Part>()
-
                 imageUris.forEachIndexed { index, uri ->
                     val file = uriToFile(uri, context)
                     val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-
                     val fileName = "act_${System.currentTimeMillis()}_$index.jpg"
-
                     val part = MultipartBody.Part.createFormData("foto_kegiatan", fileName, requestFile)
                     imageParts.add(part)
                 }
@@ -100,7 +103,12 @@ class ActivityViewModel : ViewModel() {
                     successMessage = "Aktivitas berhasil dibuat!"
                     getActivities(communityId)
                 } else {
-                    errorMessage = "Gagal: ${response.message()}"
+                    val errorJson = response.errorBody()?.string()
+                    errorMessage = try {
+                        JSONObject(errorJson!!).optString("msg", "Gagal membuat aktivitas")
+                    } catch (e: Exception) {
+                        "Gagal: ${response.message()}"
+                    }
                 }
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"
@@ -135,6 +143,12 @@ class ActivityViewModel : ViewModel() {
         imageUris: List<Uri>,
         context: Context
     ) {
+        val alphaSpaceRegex = Regex("^[a-zA-Z\\s]*$")
+        if (!judul.matches(alphaSpaceRegex) || !lokasi.matches(alphaSpaceRegex)) {
+            errorMessage = "Judul dan Lokasi hanya boleh berisi huruf!"
+            return
+        }
+
         viewModelScope.launch {
             isLoading = true
             try {
@@ -165,7 +179,12 @@ class ActivityViewModel : ViewModel() {
                     successMessage = "Aktivitas berhasil diperbarui!"
                     getActivities(communityId)
                 } else {
-                    errorMessage = "Gagal update: ${response.message()}"
+                    val errorJson = response.errorBody()?.string()
+                    errorMessage = try {
+                        JSONObject(errorJson!!).optString("msg", "Gagal memperbarui aktivitas")
+                    } catch (e: Exception) {
+                        "Gagal update: ${response.message()}"
+                    }
                 }
             } catch (e: Exception) {
                 errorMessage = "Error: ${e.message}"

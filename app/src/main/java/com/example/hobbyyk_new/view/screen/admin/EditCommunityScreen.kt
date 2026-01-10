@@ -45,6 +45,7 @@ import com.example.hobbyyk_new.viewmodel.AdminCommunityViewModel
 fun EditCommunityScreen(navController: NavController, communityId: Int) {
     val context = LocalContext.current
     val userStore = remember { UserStore(context) }
+    val alphaSpaceRegex = Regex("^[a-zA-Z\\s]*$")
 
     val factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -67,6 +68,8 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
     var newBannerUri by remember { mutableStateOf<Uri?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
+    var isDataLoaded by remember { mutableStateOf(false) }
+
     LaunchedEffect(viewModel.errorMessage) {
         viewModel.errorMessage?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
@@ -79,13 +82,16 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
     }
 
     LaunchedEffect(viewModel.myCommunity) {
-        viewModel.myCommunity?.let {
-            if (nama.isEmpty()) nama = it.nama_komunitas
-            if (kategori.isEmpty()) kategori = it.kategori
-            if (deskripsi.isEmpty()) deskripsi = it.deskripsi ?: ""
-            if (lokasi.isEmpty()) lokasi = it.lokasi ?: ""
-            if (kontak.isEmpty()) kontak = it.kontak ?: ""
-            if (linkGrup.isEmpty()) linkGrup = it.link_grup ?: ""
+        if (viewModel.myCommunity != null && !isDataLoaded) {
+            val it = viewModel.myCommunity!!
+            nama = it.nama_komunitas
+            kategori = it.kategori
+            deskripsi = it.deskripsi ?: ""
+            lokasi = it.lokasi ?: ""
+            kontak = it.kontak ?: ""
+            linkGrup = it.link_grup ?: ""
+
+            isDataLoaded = true
         }
     }
 
@@ -121,7 +127,6 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // Logo Edit
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                         Box(
                             contentAlignment = Alignment.BottomEnd,
@@ -158,7 +163,6 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                         }
                     }
 
-                    // Banner Edit
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(2f)) {
                         Box(
                             contentAlignment = Alignment.BottomEnd,
@@ -198,11 +202,18 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = nama,
-                    onValueChange = { nama = it },
+                    onValueChange = { if (it.isEmpty() || it.matches(alphaSpaceRegex)) {
+                        nama = it
+                    } },
+                    placeholder = { Text("Contoh: Komunitas Fotografi Jogja", color = Color.LightGray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF6B35),
-                        unfocusedBorderColor = Color(0xFFEEEEEE)
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFFF6B35),
+                        unfocusedBorderColor = Color(0xFFE0E0E0),
+                        focusedLabelColor = Color(0xFFFF6B35),
+                        cursorColor = Color(0xFFFF6B35),
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     )
                 )
 
@@ -215,11 +226,17 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                     modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = kategori, onValueChange = {}, readOnly = true,
+                        placeholder = { Text("Pilih kategori...", color = Color.LightGray) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF6B35),
-                            unfocusedBorderColor = Color(0xFFEEEEEE))
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFFF6B35),
+                            unfocusedBorderColor = Color(0xFFE0E0E0),
+                            focusedLabelColor = Color(0xFFFF6B35),
+                            cursorColor = Color(0xFFFF6B35),
+                            errorBorderColor = MaterialTheme.colorScheme.error
+                        )
                     )
                     ExposedDropdownMenu(expanded = expanded,
                         onDismissRequest = { expanded = false },
@@ -238,11 +255,18 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = lokasi,
-                    onValueChange = { lokasi = it },
+                    onValueChange = { if (it.isEmpty() || it.matches(alphaSpaceRegex)) {
+                        lokasi = it
+                    } },
+                    placeholder = { Text("Daerah/Kecamatan di Yogyakarta", color = Color.LightGray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF6B35),
-                        unfocusedBorderColor = Color(0xFFEEEEEE)
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFFF6B35),
+                        unfocusedBorderColor = Color(0xFFE0E0E0),
+                        focusedLabelColor = Color(0xFFFF6B35),
+                        cursorColor = Color(0xFFFF6B35),
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     )
                 )
 
@@ -253,11 +277,16 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                 OutlinedTextField(
                     value = deskripsi,
                     onValueChange = { deskripsi = it },
+                    placeholder = { Text("Jelaskan visi atau kegiatan komunitas Anda...", color = Color.LightGray) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 4,
                     shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF6B35),
-                        unfocusedBorderColor = Color(0xFFEEEEEE)
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFFF6B35),
+                        unfocusedBorderColor = Color(0xFFE0E0E0),
+                        focusedLabelColor = Color(0xFFFF6B35),
+                        cursorColor = Color(0xFFFF6B35),
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     )
                 )
 
@@ -268,10 +297,15 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                 OutlinedTextField(
                     value = kontak,
                     onValueChange = { kontak = it },
+                    placeholder = { Text("Nomor WhatsApp Aktif", color = Color.LightGray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF6B35),
-                        unfocusedBorderColor = Color(0xFFEEEEEE)
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFFF6B35),
+                        unfocusedBorderColor = Color(0xFFE0E0E0),
+                        focusedLabelColor = Color(0xFFFF6B35),
+                        cursorColor = Color(0xFFFF6B35),
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     )
                 )
 
@@ -285,8 +319,12 @@ fun EditCommunityScreen(navController: NavController, communityId: Int) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     placeholder = { Text("https://chat.whatsapp.com/...") },
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF6B35),
-                        unfocusedBorderColor = Color(0xFFEEEEEE)
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFFF6B35),
+                        unfocusedBorderColor = Color(0xFFE0E0E0),
+                        focusedLabelColor = Color(0xFFFF6B35),
+                        cursorColor = Color(0xFFFF6B35),
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     )
                 )
 

@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -100,13 +101,12 @@ fun ActivityDetailScreen(
                 Column(
                     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 ) {
-                    // Modern Gallery Grid (Poles Visual)
                     if (images.isNotEmpty()) {
                         Row(
                             modifier = Modifier.fillMaxWidth().height(240.dp).padding(24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            images.take(3).forEach { imgName -> // Maksimal 3 gambar untuk grid yang rapi
+                            images.take(3).forEach { imgName ->
                                 AsyncImage(
                                     model = "${Constants.URL_GAMBAR_BASE}$imgName",
                                     contentDescription = null,
@@ -134,7 +134,6 @@ fun ActivityDetailScreen(
 
                         Spacer(modifier = Modifier.height(28.dp))
 
-                        // Info Cards Section (Modernized)
                         Surface(
                             color = Color(0xFFFAFAFA),
                             shape = RoundedCornerShape(24.dp),
@@ -168,7 +167,7 @@ fun ActivityDetailScreen(
 }
 
 @Composable
-fun DetailInfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, accentColor: Color) {
+fun DetailInfoRow(icon: ImageVector, label: String, value: String, accentColor: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier.size(40.dp).background(accentColor.copy(alpha = 0.1f), CircleShape),

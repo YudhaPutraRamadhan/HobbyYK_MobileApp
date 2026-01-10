@@ -1,4 +1,4 @@
-package com.example.hobbyyk_new.view.screen.user
+package com.example.hobbyyk_new.view.screen.auth
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -33,9 +33,7 @@ import com.example.hobbyyk_new.viewmodel.ProfileViewModel
 @Composable
 fun VerifyChangePassScreen(navController: NavController) {
     val context = LocalContext.current
-    val viewModel: ProfileViewModel = viewModel(
-        viewModelStoreOwner = context as androidx.lifecycle.ViewModelStoreOwner
-    )
+    val viewModel: ProfileViewModel = viewModel()
 
     var otp by remember { mutableStateOf("") }
     var newPass by remember { mutableStateOf("") }

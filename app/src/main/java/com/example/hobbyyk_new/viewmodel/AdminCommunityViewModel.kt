@@ -120,6 +120,18 @@ class AdminCommunityViewModel (private val userStore: UserStore) : ViewModel() {
         kategori: String, kontak: String, linkGrup: String,
         logoFile: File, bannerFile: File?
     ) {
+        val alphaSpaceRegex = Regex("^[a-zA-Z\\s]+$")
+
+        if (!nama.matches(alphaSpaceRegex)) {
+            errorMessage = "Nama komunitas hanya boleh berisi huruf!"
+            return
+        }
+
+        if (!lokasi.matches(alphaSpaceRegex)) {
+            errorMessage = "Lokasi hanya boleh berisi nama daerah (huruf)!"
+            return
+        }
+
         viewModelScope.launch {
             isLoading = true
             try {

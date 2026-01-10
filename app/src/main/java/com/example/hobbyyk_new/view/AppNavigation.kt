@@ -60,8 +60,8 @@ import com.example.hobbyyk_new.view.screen.superadmin.UserListScreen
 import com.example.hobbyyk_new.view.screen.user.ActivityFeedScreen
 import com.example.hobbyyk_new.view.screen.user.EditProfileScreen
 import com.example.hobbyyk_new.view.screen.user.ProfileScreen
-import com.example.hobbyyk_new.view.screen.user.VerifyChangeEmailScreen
-import com.example.hobbyyk_new.view.screen.user.VerifyChangePassScreen
+import com.example.hobbyyk_new.view.screen.auth.VerifyChangeEmailScreen
+import com.example.hobbyyk_new.view.screen.auth.VerifyChangePassScreen
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController

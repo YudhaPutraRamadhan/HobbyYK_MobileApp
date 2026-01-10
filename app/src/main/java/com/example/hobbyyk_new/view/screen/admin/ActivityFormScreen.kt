@@ -51,7 +51,12 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
     var waktu by remember { mutableStateOf("") }
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
-    LaunchedEffect(activityId) { if (activityId != null && activityId != 0) viewModel.getActivityDetail(activityId) }
+    val alphaSpaceRegex = Regex("^[a-zA-Z\\s]*$")
+
+    LaunchedEffect(activityId) {
+        if (activityId != null && activityId != 0) viewModel.getActivityDetail(activityId)
+    }
+
     LaunchedEffect(viewModel.selectedActivity) {
         if (activityId != null && activityId != 0) {
             viewModel.selectedActivity?.let {
@@ -68,11 +73,21 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
         }
     }
 
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.clearMessages()
+        }
+    }
+
     val calendar = Calendar.getInstance()
-    val datePickerDialog = DatePickerDialog(context, { _, y, m, d -> tanggal = String.format("%04d-%02d-%02d", y, m + 1, d) },
-        calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-    val timePickerDialog = TimePickerDialog(context, { _, h, min -> waktu = String.format("%02d:%02d:00", h, min) },
-        calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true)
+    val datePickerDialog = DatePickerDialog(context, { _, y, m, d ->
+        tanggal = String.format("%04d-%02d-%02d", y, m + 1, d)
+    }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+
+    val timePickerDialog = TimePickerDialog(context, { _, h, min ->
+        waktu = String.format("%02d:%02d:00", h, min)
+    }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true)
 
     val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         selectedImages = uris.take(2)
@@ -93,7 +108,9 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
         }
     ) { paddingValues ->
         if (viewModel.isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Color(0xFFFF6B35)) }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFFFF6B35))
+            }
         } else {
             Column(modifier = Modifier.padding(paddingValues).fillMaxSize().padding(horizontal = 24.dp).verticalScroll(scrollState)) {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -119,13 +136,8 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
 
                     selectedImages.forEach { uri ->
                         AsyncImage(
-                            model = uri,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(110.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .shadow(2.dp)
+                            model = uri, contentDescription = null, contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(110.dp).clip(RoundedCornerShape(24.dp)).shadow(2.dp)
                         )
                     }
                 }
@@ -135,7 +147,8 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
                 LabelText("Judul Kegiatan")
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = judul, onValueChange = { judul = it },
+                    value = judul,
+                    onValueChange = { if (it.isEmpty() || it.matches(alphaSpaceRegex)) judul = it }, // Filter Huruf
                     placeholder = { Text("Contoh: Kopdar Rutin Fotografi", color = Color.LightGray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -174,7 +187,8 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
                 LabelText("Lokasi")
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = lokasi, onValueChange = { lokasi = it },
+                    value = lokasi,
+                    onValueChange = { if (it.isEmpty() || it.matches(alphaSpaceRegex)) lokasi = it }, // Filter Huruf
                     placeholder = { Text("Lokasi spesifik di Jogja", color = Color.LightGray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -187,9 +201,7 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = deskripsi, onValueChange = { deskripsi = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 5,
-                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth(), minLines = 5, shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF6B35), unfocusedBorderColor = Color(0xFFEEEEEE))
                 )
 
@@ -197,20 +209,28 @@ fun ActivityFormScreen(navController: NavController, communityId: Int, activityI
 
                 Button(
                     onClick = {
-                        if (judul.isNotEmpty() && tanggal.isNotEmpty()) {
-                            if (activityId == null || activityId == 0) {
-                                viewModel.createActivity(communityId, judul, deskripsi, lokasi, tanggal, waktu, selectedImages, context)
-                            } else {
-                                viewModel.updateActivity(activityId, communityId, judul, deskripsi, lokasi, tanggal, waktu, selectedImages, context)
-                            }
-                        } else { Toast.makeText(context, "Judul dan Tanggal wajib diisi!", Toast.LENGTH_SHORT).show() }
+                        if (judul.isEmpty() || tanggal.isEmpty() || lokasi.isEmpty() || deskripsi.isEmpty()) {
+                            Toast.makeText(context, "Mohon lengkapi semua data!", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+
+                        if ((activityId == null || activityId == 0) && selectedImages.isEmpty()) {
+                            Toast.makeText(context, "Minimal unggah 1 foto kegiatan!", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+
+                        if (activityId == null || activityId == 0) {
+                            viewModel.createActivity(communityId, judul, deskripsi, lokasi, tanggal, waktu, selectedImages, context)
+                        } else {
+                            viewModel.updateActivity(activityId, communityId, judul, deskripsi, lokasi, tanggal, waktu, selectedImages, context)
+                        }
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp).shadow(12.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFFFF6B35)),
                     shape = RoundedCornerShape(16.dp),
                     enabled = !viewModel.isLoading,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6B35))
                 ) {
-                    Text(if (activityId != 0) "Update Kegiatan" else "Publikasikan Sekarang", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(if (activityId != 0 && activityId != null) "Update Kegiatan" else "Publikasikan Sekarang", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
                 Spacer(modifier = Modifier.height(40.dp))
             }

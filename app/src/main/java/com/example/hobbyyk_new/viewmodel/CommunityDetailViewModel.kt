@@ -1,5 +1,6 @@
 package com.example.hobbyyk_new.viewmodel
 
+import android.R.id.message
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,7 @@ import com.example.hobbyyk_new.data.api.ApiService
 import com.example.hobbyyk_new.data.api.RetrofitClient
 import com.example.hobbyyk_new.data.model.Community
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 class CommunityDetailViewModel : ViewModel() {
 
@@ -22,6 +24,8 @@ class CommunityDetailViewModel : ViewModel() {
     var memberCount by mutableIntStateOf(0)
 
     var likeCount by mutableIntStateOf(0)
+
+    var message by mutableStateOf<String?>(null)
 
     fun getDetail(id: Int) {
         viewModelScope.launch {
@@ -61,10 +65,18 @@ class CommunityDetailViewModel : ViewModel() {
                 if (!response.isSuccessful) {
                     isJoined = oldState
                     if (isJoined) memberCount++ else memberCount--
+
+                    val errorBody = response.errorBody()?.string()
+                    if (errorBody != null) {
+                        val msg = JSONObject(errorBody).optString("msg", "Gagal bergabung")
+                        message = msg
+                    }
                 }
             } catch (e: Exception) {
                 isJoined = oldState
+                if (isJoined) memberCount++ else memberCount-- // Rollback angka jika koneksi mati
                 e.printStackTrace()
+                message = "Kesalahan jaringan"
             }
         }
     }
@@ -82,10 +94,20 @@ class CommunityDetailViewModel : ViewModel() {
 
                 if (!response.isSuccessful) {
                     isLiked = oldState
+                    if (isLiked) likeCount++ else likeCount-- // Tambahkan ini agar angka like juga balik (rollback)
+
+                    // TAMBAHAN: Ambil pesan dari backend
+                    val errorBody = response.errorBody()?.string()
+                    if (errorBody != null) {
+                        val msg = JSONObject(errorBody).optString("msg", "Gagal menyukai")
+                        message = msg
+                    }
                 }
             } catch (e: Exception) {
                 isLiked = oldState
+                if (isLiked) likeCount++ else likeCount-- // Rollback angka jika koneksi mati
                 e.printStackTrace()
+                message = "Kesalahan jaringan"
             }
         }
     }
